@@ -158,7 +158,7 @@ $(function(){
                     if(return_to){
                         window.location = return_to;
                     }else{
-                        window.location = '/fron_home_page/';
+                        window.location = '/front_home_page/';
                     }
                 }else{
                     lgalert.alertInfo(data['message']);

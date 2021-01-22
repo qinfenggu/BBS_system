@@ -34,3 +34,9 @@ class SignUpForm(BaseForm):
         redis_graph_captcha = redis_save_capthcha.redis_get(graph_captcha.lower())
         if not redis_graph_captcha:
             raise ValidationError(message='图形验证码输入错误')
+
+
+class SignInForm(BaseForm):
+    telephone = StringField(validators=[Regexp(r'1[345789]\d{9}', message='请输入合法的手机号码')])
+    password = StringField(validators=[Regexp(r'[0-9a-zA-Z]'), Length(min=6, max=20, message='请输入6-20位的密码')])
+    remember = StringField()

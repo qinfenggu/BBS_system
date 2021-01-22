@@ -51,7 +51,7 @@ $(function(){
                     if(return_to){
                         window.location = return_to;
                     }else{
-                        window.location = '/';
+                        window.location = '/front_home_page/';
                     }
                 }else{
                     lgalert.alertInfo(data['message']);
