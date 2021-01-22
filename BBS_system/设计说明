@@ -1,9 +1,72 @@
-apps创建包原因：避免.py文件名冲突
+需要安装：pip install yunpian-python-sdk
 cms:    后台即管理员操作的功能。这些后台管理员账号是通过命令行添加到数据库里面的
 front:  前台展示给前端那边显示的功能。前台用户就是真正使用这个论坛的用户
 common：公共
 utils.restful.py： 规范返回的json数据，节省很大代码
 templates.common.sweetalert: 是温馨提示的弹出框文件
+utils.random_captcha:随机生成邮箱验证码
+utils.restful：返回值和状态码
+apps.cms.decorators.py:用于登录后，如果通过URL直接访问某些管理页面，
+                       则判断当前用户是否拥有这个权限。如果没有则重定向到首页
+static.common.images.logo.png:这个是前台注册界面的图形验证码用到的图片
 
-后台管理账号：用户名--顾青峰；  邮箱地址--3136413608@qq.com；  密码--123456789
 
+
+1、apps创建包原因：
+    避免.py文件名冲突
+
+2、使用redis来存放验证码原因：
+    redis缓存运行效率高。像验证码这种频繁的数据，存在mysql这种数据库，经常更改数据库数据就会很影响这个网站的运行
+    而且redis有丰富的数据结构（五大数据结构）
+
+
+3、用二进制表示权限原因:
+    用二进制来表示不同的权限，二进制里面1在哪个位置表示能这个位置是拥有哪种权限
+    拥有了权限管理，必须得知道所属什么角色才可登陆吧，不能啥角色都不是就可以登陆
+    用户与角色多对多，角色与用户多对多
+
+
+4、设置权限的原因：
+    0b00000001 和 0b00000010，...组成0bxxxxxxxx，判断0bxxxxxxxx里面是否含有0b00000010：
+    0bxxxxxxxx & 0b00000010 == 0b00000010  # 如果0bxxxxxxxx里面含有0b00000010 ，那么0bxxxxxxxx & 0b00000010 得到的是0b00000010，反之则是其他
+    所以可先把这个用户拥有的所有权限给|出来，得到一个总的二进制。然后，利用上面原理可进行判断这个总的二进制权限是否含有某个二进制的权限，
+    有就给该用户显示这个权限管理的页面，没有就不显示
+
+
+5、注册页面设置图形验证码原因：
+    为了防止用户利用机器人批量自动注册
+
+
+
+
+注册页面流程：
+    1、刚进入注册页面时，图形验证码会保存到redis里面（是以验证码小写为key，value也是小写）。
+
+    如果点击'发送验证码'，会post请求'发送验证码'URL(common.views.py.sms_captcha()),并表单验证该请求是否注册页面请求(common.models.py.SMSCaptchaForm())
+        来决定发不发短信验证码。如果发后则保存短信验证码到redis
+
+    如果点击注册，会post请求'注册'URL，进行验证码表单和验证短信、图形验证码是否与redis一致
+
+
+后台管理账号：
+用户名--顾青峰；  邮箱地址--3136413608@qq.com；  密码--123456   开发者
+用户名--顾青峰；  邮箱地址--1317035635@qq.com；  密码--123456   访问者
+
+
+
+
+注意：
+    1、图形验证码图片充当返回值，要映射到前端页面，必须得把图片保存到字节流流中,然后Response(out.read(), mimetype='image/png')
+    2、调用/singup/这个路由时，会显示D:\python_projext\BBS_system\templates\front\front_signup.html，这个HTML里面有
+        <img id="captcha-img" class="captcha-img" src="{{ url_for('front.graph_captcha') }}" alt="">标签
+        这个标签会调用graph_captcha路由，从而显示图形验证码-->
+    3、表单验证的字段，除了可以HTML标签name属性值，还可js里面ajax的post请求data里面的字段
+
+
+
+难懂：
+1、app.front.models.py:FrontUser类->__init__方法:
+    kwargs.pop('password')；super().__init__(*args, **kwargs)
+
+2、D:\python_projext\BBS_system\utils\captcha\__init__.py：
+    里面写图形验证码的写法

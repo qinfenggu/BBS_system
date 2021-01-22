@@ -29,3 +29,5 @@ def params_errors(message=""):
 
 def server_errors(message="服务器内部错误"):
     return restful_result(code=HttpCode.servererror, message=message, data=None)
+
+

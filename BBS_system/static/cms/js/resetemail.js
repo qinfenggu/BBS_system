@@ -24,11 +24,11 @@ var lgajax = {
     }
 };
 $(function () {
-    $("#captcha-btn").click(function (event) {
+    $("#image_captcha-btn").click(function (event) {
         event.preventDefault();
         var email = $("input[name='email']").val();
         if(!email){
-            lgalert.alertInfoToast('请输入邮箱');
+            lgalert.alertInfoToast('请输入邮箱地址');
             return;
         }
         var lgajax = {
@@ -79,7 +79,7 @@ $(function () {
     $("#submit").click(function (event) {
         event.preventDefault();
         var emailE = $("input[name='email']");
-        var captchaE = $("input[name='captcha']");
+        var captchaE = $("input[name='image_captcha']");
 
         var email = emailE.val();
         var captcha = captchaE.val();

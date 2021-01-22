@@ -21,11 +21,21 @@
         </tr>
         <tr>
             <td>角色：</td>
-            <td>暂未实现</td>
+            <td>{% for role in user.roles %}
+                    {{ role.name }}
+                    <!--判断列出的角色是否是最后一个-->
+                    {% if not loop.last %}
+                        ,
+                    {% endif %}
+                {% endfor %}
+            </td>
         </tr>
         <tr>
             <td>权限：</td>
-            <td>暂未实现</td>
+            <td>{% for role in user.roles %}
+                    {{ role.describe }}
+                {% endfor %}
+            </td>
         </tr>
         <tr>
             <td>注册时间：</td>
@@ -33,4 +43,5 @@
         </tr>
     </table>
 {% endblock %}
+
 

@@ -1,14 +1,20 @@
 {% extends 'cms/cms_base.html' %}
 
 {% block title %}
-    轻风言论坛CMS管理系统
 {% endblock %}
 
+{% block head %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/5.13.0/css/all.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='cms/css/home_page.css') }}">
+
+{% endblock %}
 {% block page_title %}
-    欢迎来到轻风言论坛CMS管理系统
+
 {% endblock %}
 
 
 {% block content %}
-    {{ self.page_title() }}
 {% endblock %}

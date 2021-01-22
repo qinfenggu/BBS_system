@@ -26,11 +26,17 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">轻风言论坛CMS管理系统</a>
+          <a class="navbar-brand" href="#">论坛CMS管理系统</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
-            <li><a href="#">{{ g.user.username }}<span>[超级管理员]</span></a></li>
+            <li><a href="#">{{ g.user.username }}
+                <span>[
+                {% for role in g.user.roles %}
+                    {{ role.name }}
+                {% endfor %}
+                ]</span>
+            </a></li>
             <li><a href="{{ url_for('cms.logout') }}">注销</a></li>
           </ul>
           <form class="navbar-form navbar-right">
@@ -53,16 +59,29 @@
                         <li><a href="{{ url_for('cms.resetemail') }}">修改邮箱</a></li>
                     </ul>
                 </li>
+                  {% set user = g.user %}
 
-                <li class="nav-group post-manage"><a href="#">帖子管理</a></li>
-                <li class="comments-manage"><a href="#">评论管理</a></li>
-                <li class="board-manage"><a href="#">板块管理</a></li>
+                  <!--判断是否有那些权限，有就显示出相对前端页面-->
+                  {% if  user.has_permissions(CMSPersmission.POSTER) %}
+                    <li class="nav-group post-manage"><a href="{{ url_for('cms.posts') }}">帖子管理</a></li>
+                  {% endif %}
+                  {% if  user.has_permissions(CMSPersmission.COMMENTER) %}
+                    <li class="comments-manage"><a href="{{ url_for('cms.comments') }}">评论管理</a></li>
+                  {% endif %}
+                  {% if  user.has_permissions(CMSPersmission.BOARDER) %}
+                    <li class="board-manage"><a href="{{ url_for('cms.boards') }}">板块管理</a></li>
+                  {% endif %}
+                  {% if  user.has_permissions(CMSPersmission.FRONTUSER) %}
+                    <li class="nav-group user-manage"><a href="">前台用户管理</a></li>
+                  {% endif %}
+                  {% if  user.has_permissions(CMSPersmission.CMSUSER) %}
+                    <li class="nav-group cmsuser-manage"><a href="#">后台用户管理</a></li>
+                  {% endif %}
 
-                <li class="nav-group user-manage"><a href="#">用户管理</a></li>
-                <li class="role-manage"><a href="#">组管理</a></li>
-
-                <li class="nav-group cmsuser-manage"><a href="#">CMS用户管理</a></li>
-                <li class="cmsrole-manage"><a href="#">CMS组管理</a></li>
+                  <!--判断是否是开发人员，有就显示CMS组管理页面-->
+                  {% if  user.is_developer%}
+                  <li class="cmsrole-manage"><a href="#">角色管理</a></li>
+                  {% endif %}
             </ul>
           </div>
           <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
