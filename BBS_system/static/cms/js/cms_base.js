@@ -60,5 +60,8 @@ $(function () {
     }else if(url.indexOf('comments') >= 0) {
         var commentsManageLi = $('.comments-manage');
         commentsManageLi.addClass('unfold').siblings().removeClass('unfold');
+    }else if(url.indexOf('banners') >= 0) {
+        var commentsManageLi = $('.banners-manage');
+        commentsManageLi.addClass('unfold').siblings().removeClass('unfold');
     }
 });

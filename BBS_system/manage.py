@@ -2,8 +2,8 @@ from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from bbs import app
 from excit import db
-from apps.cms.models import CMSUser, CMSRole, CMSPersmission
-from apps.front.models import FrontUser
+from apps.cms.models import CMSUser, CMSRole, CMSPersmission, BannerModel, BoardModel, EssencePostsModel
+from apps.front.models import FrontUser, PostsModel, CommentModel
 
 
 manager = Manager(app)
@@ -58,6 +58,8 @@ def add_user_to_role(email, username):
             print('{}角色不存在！'.format(role))
     else:
         print('{}用户不存在！'.format(email))
+
+
 
 
 if __name__ == '__main__':

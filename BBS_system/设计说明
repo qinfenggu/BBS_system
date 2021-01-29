@@ -4,48 +4,53 @@
 前台账号：
 用户名--没你可爱  密码--123456  手机号--18059007673
 
-需要安装：pip install yunpian-python-sdk
-cms:    后台即管理员操作的功能。这些后台管理员账号是通过命令行添加到数据库里面的
-front:  前台展示给前端那边显示的功能。前台用户就是真正使用这个论坛的用户
-common：公共
-utils.restful.py： 规范返回的json数据，节省很大代码
-templates.common.sweetalert: 是温馨提示的弹出框文件
-utils.random_captcha:随机生成邮箱验证码
-utils.restful：返回值和状态码
-apps.cms.decorators.py:用于登录后，如果通过URL直接访问某些管理页面，
-                       则判断当前用户是否拥有这个权限。如果没有则重定向到首页
-static.common.images.logo.png:这个是前台注册界面的图形验证码用到的图片
+短信验证发送平台：云片，需要安装：pip install yunpian-python-sdk
+轮播图存储空间平台：七牛云 需要安装：pip install qiniu
+
+【】一些文件夹及文件说明：
+    cms:    后台即管理员操作的功能。这些后台管理员账号是通过命令行添加到数据库里面的
+    front:  前台展示给前端那边显示的功能。前台用户就是真正使用这个论坛的用户
+    common：公共
+    utils.restful.py： 规范返回的json数据，节省很大代码
+    templates.common.sweetalert: 是温馨提示的弹出框文件
+    static.common.js.lgqiniu.js: 和上面的 templates.common.sweetalert一样，里面有很大七牛云封装方法，想用哪个方法直接用调用对应方法就行
+    utils.random_captcha:随机生成邮箱验证码
+    utils.restful：返回值和状态码
+    apps.cms.decorators.py:用于登录后，如果通过URL直接访问某些管理页面，
+                           则判断当前用户是否拥有这个权限。如果没有则重定向到首页
+    static.common.images.logo.png:这个是前台注册界面的图形验证码用到的图片
+    static.ueditor:用于post详情页面下面的评论编译器。它是一个百度的编译器吧。
+
+
+【】某些设计方法思路理由
+    1、apps创建包原因：
+        避免.py文件名冲突
+
+    2、使用redis来存放验证码原因：
+        redis缓存运行效率高。像验证码这种频繁的数据，存在mysql这种数据库，经常更改数据库数据就会很影响这个网站的运行
+        而且redis有丰富的数据结构（五大数据结构）
+
+
+    3、用二进制表示权限原因:
+        用二进制来表示不同的权限，二进制里面1在哪个位置表示能这个位置是拥有哪种权限
+        拥有了权限管理，必须得知道所属什么角色才可登陆吧，不能啥角色都不是就可以登陆
+        用户与角色多对多，角色与用户多对多
+
+
+    4、设置权限的原因：
+        0b00000001 和 0b00000010，...组成0bxxxxxxxx，判断0bxxxxxxxx里面是否含有0b00000010：
+        0bxxxxxxxx & 0b00000010 == 0b00000010  # 如果0bxxxxxxxx里面含有0b00000010 ，那么0bxxxxxxxx & 0b00000010 得到的是0b00000010，反之则是其他
+        所以可先把这个用户拥有的所有权限给|出来，得到一个总的二进制。然后，利用上面原理可进行判断这个总的二进制权限是否含有某个二进制的权限，
+        有就给该用户显示这个权限管理的页面，没有就不显示
+
+
+    5、注册页面设置图形验证码原因：
+        为了防止用户利用机器人批量自动注册
 
 
 
-1、apps创建包原因：
-    避免.py文件名冲突
 
-2、使用redis来存放验证码原因：
-    redis缓存运行效率高。像验证码这种频繁的数据，存在mysql这种数据库，经常更改数据库数据就会很影响这个网站的运行
-    而且redis有丰富的数据结构（五大数据结构）
-
-
-3、用二进制表示权限原因:
-    用二进制来表示不同的权限，二进制里面1在哪个位置表示能这个位置是拥有哪种权限
-    拥有了权限管理，必须得知道所属什么角色才可登陆吧，不能啥角色都不是就可以登陆
-    用户与角色多对多，角色与用户多对多
-
-
-4、设置权限的原因：
-    0b00000001 和 0b00000010，...组成0bxxxxxxxx，判断0bxxxxxxxx里面是否含有0b00000010：
-    0bxxxxxxxx & 0b00000010 == 0b00000010  # 如果0bxxxxxxxx里面含有0b00000010 ，那么0bxxxxxxxx & 0b00000010 得到的是0b00000010，反之则是其他
-    所以可先把这个用户拥有的所有权限给|出来，得到一个总的二进制。然后，利用上面原理可进行判断这个总的二进制权限是否含有某个二进制的权限，
-    有就给该用户显示这个权限管理的页面，没有就不显示
-
-
-5、注册页面设置图形验证码原因：
-    为了防止用户利用机器人批量自动注册
-
-
-
-
-注册页面流程：
+【】注册页面流程：
     1、刚进入注册页面时，图形验证码会保存到redis里面（是以验证码小写为key，value也是小写）。
 
     如果点击'发送验证码'，会post请求'发送验证码'URL(common.views.py.sms_captcha()),并表单验证该请求是否注册页面请求(common.models.py.SMSCaptchaForm())
@@ -53,7 +58,7 @@ static.common.images.logo.png:这个是前台注册界面的图形验证码用�
 
     如果点击'注册'，会post请求'注册'URL，进行验证码表单和验证短信、图形验证码是否与redis一致。
 
-    2、注册成功后，如果访问当前注册页面是通过点击类似a标签这种URL页面跳转过来访问的，注册成功就跳转回那个URL页面。
+    2、如果访问当前注册页面是通过点击类似a标签这种URL页面跳转过来访问的，注册成功就跳转回那个URL页面。
         如果不是就跳转到/fron_home_page/。
 
 
@@ -64,16 +69,81 @@ static.common.images.logo.png:这个是前台注册界面的图形验证码用�
 
 注意：
     1、图形验证码图片充当返回值，要映射到前端页面，必须得把图片保存到字节流流中,然后Response(out.read(), mimetype='image/png')
-    2、调用/singup/这个路由时，会显示D:\python_projext\BBS_system\templates\front\front_signup.html，这个HTML里面有
+    2、调用注册/singup/这个路由时，会显示front_signup.html页面，这个HTML里面有
         <img id="captcha-img" class="captcha-img" src="{{ url_for('front.graph_captcha') }}" alt="">标签
-        这个标签会调用graph_captcha路由，从而显示图形验证码-->
-    3、表单验证的字段，除了可以HTML标签name属性值，还可js里面ajax的post请求data里面的字段
+        而这个标签会调用生成图形验证码/graph_captcha/的路由，从而可以在注册页面显示图形验证码
+    3、表单验证的字段（即表单验证类里面的类属性），除了可以是HTML标签name属性值，还可js里面ajax的post请求data里面的字段
+    4、通过点击类似'确定'，'保存','提交'进行post请求表单提交访问URL的视图，可以通过js里面ajax实现
 
 
 
-难懂：
+
+【】难懂功能：
+整个项目弹框提示功能：用js弄的
+后台：
+    轮播图管理页面：1、点击'添加轮播图'，'编辑','删除'弹出的一个信息填框或提示框，都是通过js实现。添加上去的轮播图信息，
+                            都是按顺序显示，并且会自动有banner_id，通过banner_id就可查找该序号轮播图在数据库信息。
+                    2、'添加轮播图'和'编辑'区别，'编辑'标签会多加一个data-type == 'update'属性和data-id=数字。
+                            data-id=数字。就是自动添加上去的banner_id。所以js通过有无data-type == 'update'判断是'添加轮播图'还是'编辑'
+                    3、网上的图片链接可以保持到数据库里面。但是如果是想使用自己本地美工组弄的图片呢，图片是无法保存到数据库里面的。
+                       该项目轮播图如果是上传本地图片，点击'添加轮播图'->'添加图片',在本地选好图片点确定就会通过ajax触发和图片就会
+                            保存到七牛云云平台，这个图片会有一个域名即变成了网站链接了并自动填写到'图片框'，然后点'保存'存到数据库中了
+                            点'添加图片'是把图片上传到七牛云，点'保存'是把域名即网站链接保存到数据库中。七牛云创建的对象存储区域选华东
+    帖子管理：把front_posts表的id作为essence_posts表的外键，当essence_posts表绑定front_post表某条帖子数据时，该帖子就是表示加精帖子
+
+
+前台：
+    主页界面点击'发送验证码',就会触发发送验证码的URL，并且'发送验证码'会变成由60-0倒数
+    注册界面点击'图形验证码'就更换另一个图形验证码功能：用js弄的
+    注册/登录成功跳转功能：访问注册/登录页面如果是通过点击类似a标签这种URL页面跳转过来访问的，并且这种URL页面是在这个项目里面而不是通过反爬访问
+                            则注册成功跳转回那个URL页面。如果不是就跳转到fron_home_page。用js弄的
+
+
+     主页：
+        1、刚进去时，判断得current_board_id无值，板块那边'Python'标签是选择：<a href="{{ url_for('front.front_home_page', current_choose=current_choose, board_id=board.id) }}" class="list-group-item">Python</a>
+            下面那边'最新'标签是选择：<li class=""><a href="{{ url_for('front.front_home_page', current_choose=1, board_id= current_board_id) }}">最新</a></li>。被深灰色填充
+
+            --当点击'python'时，会触发/front_home_page/? current_choose=1， board_id=board.id这个URL即重新映射这个HTML，并且current_board_id有了值board.id，通过判断current_board_id有值
+                板块那边'Python'标签是选择：<a href="{{ url_for('front.front_home_page', board_id=board.id) }}" class="list-group-item active">Python</a>，带有active，从而'Python'被蓝色填充了，'最新'依然还是深灰色填充
+
+            --当点击'精华帖子'，会触发/front_home_page/?current_choose=2, board_id= current_board_id这个URL即重新映射这个HTML，通过判断current_board_id有值
+                板块那边'精华帖子'标签是选择：<li class="active"><a href="{{ url_for('front.front_home_page', current_choose=2, board_id= current_board_id) }}">精华帖子</a></li>，带有active，从而'精华帖子'被深灰色填充，因为board_id= current_board_id，'Python'依然还是深灰色填充
+
+            --当点击'JAVA'，会触发/front_home_page/?current_choose=current_choose, board_id=board.id这个URL即重新映射这个HTML并且current_board_id有了值board.id，通过判断current_board_id有值
+                板块那边'JAVA'标签是选择：<a href="{{ url_for('front.front_home_page', board_id=board.id) }}" class="list-group-item active">JAVA</a>，带有active，从而'JAVA'被蓝色填充了，因为current_choose=current_choose，所以'精华帖子'依然还是深灰色填充
+
+        2、'最新','精华帖子','点赞最多','评论最多'只是把所有符合点击的板块的数据按时间，是精华且时间，评论数量由高到底排序先后顺序去显示而已。每页显示一条
+
+
+
+
+    发布帖子：那个Editor编译器添加图片那块，添加本地图片太难没弄。但是可以直接把网上图片链接直接复制黏贴进去，就会自动显示图片
+
+
+
+
+【】难懂代码：
 1、app.front.models.py:FrontUser类->__init__方法:
     kwargs.pop('password')；super().__init__(*args, **kwargs)
 
 2、D:\python_projext\BBS_system\utils\captcha\__init__.py：
-    里面写图形验证码的写法
+    里面生成图形验证码的写法
+
+
+
+
+
+【】需要自己新增功能：
+    1、发布帖子那里添加一个图形验证码功能；
+    2、发布完帖子，点击'再来一遍'自动清空commont功能；
+    3、删除评论删除
+    4、点赞功能以及点赞最多列出posts功能
+    5、数据库内连接查询
+    6、后台的前后台用户管理，角色
+
+    1、前台
+        主页:实现了搜索功能，个人信息，修改密码，更换手机功能。
+        登录页：实现了找回密码功能
+
+    2、后台
+        评论管理页：删除评论功能

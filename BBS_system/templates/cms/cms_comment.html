@@ -1,0 +1,44 @@
+{% extends 'cms/cms_base.html' %}
+
+{% block title %}
+评论管理
+{% endblock %}
+
+{% block page_title %}
+<!--继承title的block所有的内容-->
+{{ self.title() }}
+{% endblock %}
+
+{% block head %}
+<script src="{{ url_for('static', filename='cms/js/comment.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<table class="table table-bordered">
+    <thead>
+    <tr>
+        <th>评论用户</th>
+        <th>评论帖子</th>
+        <th>评论内容</th>
+        <th>发表时间</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for comment in comment %}
+        <tr data-id="{{ comment.id }}">
+            <td>{{ comment.author.username }}</td>
+            <td>{{ comment.posts.title }}</td>
+            <td>{{ comment.content|safe }}</td>
+            <td>{{ comment.create_time }}</td>
+            <td>
+                <button class="btn btn-danger btn-xs delete-comment-btn">删除评论</button>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+
+
+
+

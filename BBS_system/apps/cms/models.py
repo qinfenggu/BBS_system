@@ -104,7 +104,42 @@ class CMSRole(db.Model):
     users = db.relationship('CMSUser', secondary=cms_role_user, backref='roles')
 
 
+# 轮播图
+class BannerModel(db.Model):
+    __tablename__ = 'cms_banner'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(255), nullable=False)
+    # 图片链接。就是这张图片的地址
+    image_url = db.Column(db.String(255), nullable=False)
+    # 跳转链接。就是点击这张图片会跳转到另一个URL
+    link_url = db.Column(db.String(255), nullable=False)
+    # 优先级字段。作用就是，前端每添加一条轮播图数据，我就依次增1，作用相当于id了，可以知道哪条先添加，它是第几次添加的
+    priority = db.Column(db.Integer, default=0)
+    create_time = db.Column(db.DateTime, default=datetime.now())
+    # 1表示为为删除，0表示已删除
+    is_delete = db.Column(db.Integer, default=1)
+
+    def __str__(self):
+        return 'name:{}'.format(self.name)
 
 
+# 板块管理
+class BoardModel(db.Model):
+    __tablename__ = 'cms_board'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(255), nullable=False)
+    create_time = db.Column(db.DateTime, default=datetime.now())
+    # 1表示为为删除，0表示已删除
+    is_delete = db.Column(db.Integer, default=1)
+
+
+# 精华帖子。以帖子的id作为外键
+class EssencePostsModel(db.Model):
+    __tablename__ = 'essence_posts'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    posts_id = db.Column(db.Integer, db.ForeignKey('front_posts.id'))
+    create_time = db.Column(db.DateTime, default=datetime.now())
+
+    posts = db.relationship('PostsModel', backref='essence_posts')
 
 

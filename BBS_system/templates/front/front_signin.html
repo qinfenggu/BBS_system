@@ -42,7 +42,7 @@
             </div>
             <div class="form-group">
                 <a href="{{ url_for('front.signup') }}" class="signup-link">没有账号？立即注册</a>
-                <a href="#" class="resetpwd-link" style="float:right;">找回密码</a>
+                <a href="{{ url_for('front.FindPassword') }}" class="resetpwd-link" style="float:right;">找回密码</a>
             </div>
         </div>
         <span style="display:none;" id="return-to-span">{{ return_to }}</span>

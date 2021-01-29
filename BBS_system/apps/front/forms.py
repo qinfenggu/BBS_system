@@ -1,5 +1,5 @@
-from wtforms import Form, StringField
-from wtforms.validators import Length, EqualTo, ValidationError, Regexp
+from wtforms import Form, StringField, IntegerField
+from wtforms.validators import Length, EqualTo, ValidationError, Regexp, InputRequired
 from utils import redis_save_capthcha
 
 
@@ -36,7 +36,63 @@ class SignUpForm(BaseForm):
             raise ValidationError(message='图形验证码输入错误')
 
 
+# 登录表单验证码
 class SignInForm(BaseForm):
     telephone = StringField(validators=[Regexp(r'1[345789]\d{9}', message='请输入合法的手机号码')])
     password = StringField(validators=[Regexp(r'[0-9a-zA-Z]'), Length(min=6, max=20, message='请输入6-20位的密码')])
     remember = StringField()
+
+
+# 发布帖子表单验证
+class ReleasePostsForm(BaseForm):
+    title = StringField(validators=[InputRequired(message='请输入标题')])
+    board_id = IntegerField(validators=[InputRequired(message='请输入板块ID')])
+    content = StringField(validators=[InputRequired(message='请输入内容')])
+
+
+# 发表评论表单验证
+class AddCommentForm(BaseForm):
+    posts_id = IntegerField(validators=[InputRequired(message='请输入帖子ID')])
+    content = StringField(validators=[InputRequired(message='请输入评论')])
+
+
+# 修改密码表单验证
+class FontResetPwdForm(BaseForm):
+    oldpwd = StringField(validators=[Length(min=6, max=20, message='请输入6-20位密码')])
+    newpwd = StringField(validators=[Length(min=6, max=20, message='请输入6-20位密码')])
+    newpwd2 = StringField(validators=[EqualTo('newpwd', message='两次密码输入不一致')])
+
+
+# 更换手机号表验证
+class FrontResetTelephoneForm(BaseForm):
+    telephone = StringField(validators=[Regexp(r'1[345789]\d{9}', message='请输入合法的手机号码')])
+    captcha = StringField(validators=[Length(min=6, max=6, message='请输入正确长度的验证码')])
+
+    def validate_captcha(self, field):
+        # email = request.form.get('email')
+        telephone = self.telephone.data
+        # image_captcha = request.form.get('image_captcha')
+        captcha = self.captcha.data
+        # 从redis里面取验证码出来
+        redis_captcha = redis_save_capthcha.redis_get(telephone)
+
+        if not redis_captcha or captcha.lower() != redis_captcha.lower():
+            raise ValidationError('验证码输入错误')
+
+
+# 找回密码表单验证
+class FindPasswordForm(BaseForm):
+    telephone = StringField(validators=[Regexp(r'1[345789]\d{9}', message='请输入合法的手机号码')])
+    sms_captcha = StringField(validators=[Length(min=6, max=6, message='请输入正确长度的验证码')])
+
+    newpwd = StringField(validators=[Length(min=6, max=20, message='请输入6-20位密码')])
+    newpwd2 = StringField(validators=[EqualTo('newpwd', message='两次密码输入不一致')])
+
+    # 验证输入的短信验证码与redis里面是否一致
+    def validate_sms_captcha(self, field):
+        telephone = self.telephone.data
+        sms_captcha = self.sms_captcha.data
+        # 把短信验证码从redis里面取出来
+        redis_sms_captcha = redis_save_capthcha.redis_get(telephone)
+        if not redis_sms_captcha or redis_sms_captcha != sms_captcha:
+            raise ValidationError(message='短信验证码输入错误')

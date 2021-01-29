@@ -1,5 +1,5 @@
 from wtforms import Form, IntegerField, StringField
-from wtforms.validators import Email, InputRequired, Length, EqualTo, ValidationError
+from wtforms.validators import Email, InputRequired, Length, EqualTo, ValidationError, URL
 from utils import redis_save_capthcha
 
 
@@ -38,3 +38,30 @@ class ResetEmailForm(BaseForm):
 
         if not redis_captcha or captcha.lower() != redis_captcha.lower():
             raise ValidationError('验证码输入错误')
+
+
+# 添加轮播图表单验证
+class AddBannerForm(BaseForm):
+    name = StringField(validators=[InputRequired(message='请输入轮播图名称')])
+    image_url = StringField(validators=[InputRequired(message='请输入图片链接'), URL(message='图片链接有误')])
+    link_url = StringField(validators=[InputRequired(message='请输入跳转链接'), URL(message='图片链接有误')])
+    priority = IntegerField(validators=[InputRequired(message='请输入轮播图优先级')])
+
+
+# 更新轮播图表单验证
+class UpdateBannerForm(AddBannerForm):
+    # 添加上去的轮播图信息都是按顺序排序的，每次添加都会自动有一个序号banner_id。它存在证明是'编辑',它不存在证明是'添加轮播图'。
+    # 而表单验证这个字段是因为在ajax的post请求里面的'data'有banner_id这个字段
+    banner_id = IntegerField(validators=[InputRequired(message='轮播图不存在')])
+
+
+# 添加板块表单验证
+class AddBoardForm(BaseForm):
+    name = StringField(validators=[InputRequired(message='请输入板块名称')])
+
+
+# 更新板块表单验证
+class UpdateBoardForm(AddBoardForm):
+    # 添加上去的板块信息都是按顺序排序的，每次添加都会自动有一个序号banner_id。
+    # 而要表单验证这个字段是因为在ajax的post请求里面的'data'有banner_id这个字段
+    board_id = StringField(validators=[InputRequired(message='请输入板块ID')])

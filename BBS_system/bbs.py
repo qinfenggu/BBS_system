@@ -6,6 +6,7 @@ from apps.common.views import common_bp
 import config
 from flask_wtf import CSRFProtect
 
+
 app = Flask(__name__)
 # CSRF页面保护：让请求更加安全
 CSRFProtect(app)

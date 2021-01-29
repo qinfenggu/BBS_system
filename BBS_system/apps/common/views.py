@@ -1,7 +1,8 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 from utils import yunpian_send_note_api, restful
 from utils.random_captcha import get_random_note_captcha
 from utils import redis_save_capthcha
+from utils import qiniuyun_storage_api
 from .forms import SMSCaptchaForm
 
 common_bp = Blueprint('common', __name__, url_prefix='/c/')
@@ -39,3 +40,10 @@ def sms_captcha():
     else:
         return restful.params_errors(message='参数错误')
 
+
+# 把本地图片作为轮播图上传到七牛云，使变成有一个域名即网站链接。通过点击'添加轮播图'->'添加图片'选好图片点确定后，
+# 就会通过js的ajax触发/updata_token/并把jsonify({'uptoken': token})传到ajax那边
+@common_bp.route('/updata_token/')
+def updata_token():
+    token = qiniuyun_storage_api.connecting_qiniuyun_console()
+    return jsonify({'uptoken': token})

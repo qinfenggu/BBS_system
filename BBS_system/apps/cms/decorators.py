@@ -2,7 +2,8 @@ from flask import g, redirect, url_for
 from functools import wraps
 
 
-#  这个装饰器作用：判断当前用户是否拥有need_required_permission权限。如果没有则重定向到首页
+#  这个装饰器作用：在通过URL访问某个管理页面之前，判断当前用户是否拥有这个管理(need_required_permission)的权限。
+# 如果没有则重定向到首页。
 def permission_required(need_required_permission):
     def wrapper(func):
         @wraps(func)

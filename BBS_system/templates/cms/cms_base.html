@@ -61,6 +61,7 @@
                 </li>
                   {% set user = g.user %}
 
+                  <li class="banners-manage"><a href="{{ url_for('cms.banners') }}">轮播图管理</a></li>
                   <!--判断是否有那些权限，有就显示出相对前端页面-->
                   {% if  user.has_permissions(CMSPersmission.POSTER) %}
                     <li class="nav-group post-manage"><a href="{{ url_for('cms.posts') }}">帖子管理</a></li>
@@ -72,10 +73,10 @@
                     <li class="board-manage"><a href="{{ url_for('cms.boards') }}">板块管理</a></li>
                   {% endif %}
                   {% if  user.has_permissions(CMSPersmission.FRONTUSER) %}
-                    <li class="nav-group user-manage"><a href="">前台用户管理</a></li>
+                    <li class="nav-group user-manage"><a href="#">前台用户管理</a></li>
                   {% endif %}
                   {% if  user.has_permissions(CMSPersmission.CMSUSER) %}
-                    <li class="nav-group cmsuser-manage"><a href="#">后台用户管理</a></li>
+                    <li class="cmsuser-manage"><a href="#">后台用户管理</a></li>
                   {% endif %}
 
                   <!--判断是否是开发人员，有就显示CMS组管理页面-->

@@ -3,6 +3,8 @@ from datetime import datetime
 from excit import db
 import enum
 import shortuuid
+from markdown import markdown
+import bleach
 
 
 class GenderEnum(enum.Enum):
@@ -52,3 +54,61 @@ class FrontUser(db.Model):
     def check_password(self, passe_password):
         result = check_password_hash(self.password, passe_password)
         return result
+
+
+# 帖子。发布帖子那个Editor编辑器的内容，
+class PostsModel(db.Model):
+    __tablename__ = 'front_posts'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    title = db.Column(db.String(100), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    # 保存HTNL
+    content_html = db.Column(db.Text)
+    # 访问量
+    read_count = db.Column(db.Integer, default=0)
+    like_count = db.Column(db.Integer, default=0)
+    create_time = db.Column(db.DateTime, default=datetime.now)
+    # 属于哪个模块
+    board_id = db.Column(db.Integer, db.ForeignKey("cms_board.id"))
+    # 属于哪个前台用户
+    author_id = db.Column(db.String(100), db.ForeignKey("front_user.id"))
+
+    board = db.relationship("BoardModel", backref="posts")
+    author = db.relationship("FrontUser", backref="posts")
+    is_delete = db.Column(db.Integer, default=1)
+
+    # 因为前端那边保存上来的是一个TTXT文本，不是HTML格式。下面这个方法是对保存上来的文本进行HTML格式处理
+    @staticmethod
+    def on_changed_content(target, value, oldvalue, initiator):
+        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
+                        'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
+                        'h1', 'h2', 'h3', 'p', 'img', 'video', 'div', 'iframe', 'p', 'br', 'span', 'hr', 'src', 'class']
+        allowed_attrs = {'*': ['class'],
+                         'a': ['href', 'rel'],
+                         'img': ['src', 'alt']}
+        target.content_html = bleach.linkify(bleach.clean(
+            markdown(value, output_format='html'),
+            tags=allowed_tags, strip=True, attributes=allowed_attrs))
+
+
+# 这个其实算是调用上面的on_changed_content
+db.event.listen(PostsModel.content, 'set', PostsModel.on_changed_content)
+
+
+# 评论
+class CommentModel(db.Model):
+    __tablename__ = 'front_comment'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    # content是评论语
+    content = db.Column(db.Text, nullable=False)
+    # 属于哪个前台用户
+    author_id = db.Column(db.String(100), db.ForeignKey("front_user.id"))
+    posts_id = db.Column(db.Integer, db.ForeignKey("front_posts.id"))
+    create_time = db.Column(db.DateTime, default=datetime.now)
+    is_delete = db.Column(db.Integer, default=1)
+
+    author = db.relationship("FrontUser", backref="comment")
+    posts = db.relationship("PostsModel", backref="comment")
+
+

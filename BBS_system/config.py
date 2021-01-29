@@ -15,14 +15,21 @@ MAIL_SERVER = 'smtp.qq.com'
 MAIL_PORT = '587'
 MAIL_USE_TLS = True
 # MAIL_USE_SSL : default False  465
-
+# 这个是发送者的QQ邮箱
 MAIL_USERNAME = '3136413608@qq.com'
 # 不是QQ密码
-MAIL_PASSWORD = 'jvnjpvyegeqldgfa'
+MAIL_PASSWORD = 'yjuiptzeqsbvdcdb'
 MAIL_DEFAULT_SENDER = '3136413608@qq.com'
 
 DEBUG = True
-SECRET_KEY = os.urandom(10)
+# SECRET_KEY = os.urandom(10)
+# 写固定的SECRET_KEY，这样子session_id加密字符就一样，修改代码后就不用每次重新登录
+SECRET_KEY = 'abc565pks58'
 TEMPLATES_AUTO_RELOAD = True   # 这是让模板自动更新到最新语句
 
+# 用于前台首页分页用的
+PER_PAGE = 1
 
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
