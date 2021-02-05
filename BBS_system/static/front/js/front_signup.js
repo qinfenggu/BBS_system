@@ -42,6 +42,8 @@ var param = {
 };
 
 
+
+
 var lgajax = {
     'get':function(args) {
         args['method'] = 'get';
@@ -68,6 +70,8 @@ var lgajax = {
     }
 };
 
+
+
 $(function(){
     //  http://127.0.0.1:5000/captcha/?x=0.2
     $('#captcha-img').click(function (event) {
@@ -77,6 +81,7 @@ $(function(){
         self.attr('src',newsrc);
     });
 });
+
 
 // JS加密
 $(function () {

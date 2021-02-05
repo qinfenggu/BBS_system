@@ -1,5 +1,5 @@
 from wtforms import Form, IntegerField, StringField
-from wtforms.validators import Email, InputRequired, Length, EqualTo, ValidationError, URL
+from wtforms.validators import Email, InputRequired, Length, EqualTo, ValidationError, URL, Regexp
 from utils import redis_save_capthcha
 
 
@@ -65,3 +65,18 @@ class UpdateBoardForm(AddBoardForm):
     # 添加上去的板块信息都是按顺序排序的，每次添加都会自动有一个序号banner_id。
     # 而要表单验证这个字段是因为在ajax的post请求里面的'data'有banner_id这个字段
     board_id = StringField(validators=[InputRequired(message='请输入板块ID')])
+
+
+# 添加管理员表单验证
+class AddCmsUserForm(BaseForm):
+    username = StringField(validators=[InputRequired(message='请输入用户名')])
+    password = StringField(validators=[Length(min=6, max=20, message='请输入6-20位的密码')])
+    password2 = StringField(validators=[EqualTo('password', message='两次密码输入不一致')])
+    email = StringField(validators=[Email(message='请输入正确格式的邮箱地址'), InputRequired(message='请输入邮箱地址')])
+    role = StringField(validators=[InputRequired(message='请选择角色')])
+
+
+# 管理员添加角色表单验证
+class UpdateCmsUserRole(BaseForm):
+    # 正则只能是1234
+    role_id = StringField(validators=[Regexp(r'[1234]', message='请输入正确的角色序号')])

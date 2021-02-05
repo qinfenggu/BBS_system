@@ -4,7 +4,7 @@ from utils.image_captcha.image_captcha import Captcha
 from utils import redis_save_capthcha, restful, safe_url
 from io import BytesIO
 from .forms import SignUpForm, SignInForm, ReleasePostsForm, AddCommentForm, FontResetPwdForm, FrontResetTelephoneForm, \
-                                FindPasswordForm
+                                FindPasswordForm, AddHeadPortraitForm
 from .models import FrontUser, PostsModel, CommentModel
 from apps.cms.models import BannerModel, BoardModel, EssencePostsModel
 from .decorators import front_signin_required
@@ -32,13 +32,13 @@ def front_home_page():
     boards = BoardModel.query.filter(BoardModel.is_delete == 1).order_by(BoardModel.id).all()
     # 前端<a href=" class="list-group-item active">Python</a>。带有active，Python会变蓝色填充。
     # 当点击Python时，会触发/front_home_page/? board_id=board.id这个url即重新映射这个HTML，
-    # 而使current_board_id却有了值board.id，Python选择了带active属性的a标签。Python被蓝色填充
+    # 而使下面current_board_id却有了值board.id，回到HTML那边会进行判断，然后Python选择了带active属性的a标签。Python就被蓝色填充
     # 不点posts,自然就是默认default=None。
     current_board_id = request.args.get('board_id', type=int, default=None)
     # 获取搜索框内容
     search = request.args.get('search', type=str, default='')
     # 如果点击'最新','精华帖子'，都会重定向/front_home_page/?current_choose=数字,有了数字则可判断'最新','精华帖子'
-    # 这些哪个需要深灰色填充。default=1。进入主页，默认'最新'被深灰色填充
+    # 这些哪个需要深灰色填充。默认current_choose为1。所以进入主页，默认'最新'被深灰色填充
     current_choose = request.args.get('current_choose', type=int, default=1)
 
     # 当前的页码。就是在前台鼠标点击第几页，这边会获取到那个数字。default=1默认当前分页导航框页是1
@@ -53,10 +53,10 @@ def front_home_page():
         # 精华帖子。内连接
         old_posts = db.session.query(PostsModel).join(EssencePostsModel).order_by(EssencePostsModel.create_time.desc()).filter(PostsModel.title.like('%'+search+'%'))
     elif current_choose == 3:
-        # 点赞最多
-        old_posts = PostsModel.query.filter_by(is_delete=1).order_by(PostsModel.create_time.desc()).filter(PostsModel.title.like('%'+search+'%'))
+        # 阅读量最多
+        old_posts = PostsModel.query.filter_by(is_delete=1).order_by(PostsModel.read_count.desc(),  PostsModel.create_time.desc()).filter(PostsModel.title.like('%'+search+'%'))
     elif current_choose == 4:
-        # 评论最多
+        # 评论最多。把帖子和评论两张表共同的合并，然后根据帖子id进行分组，分成几份组后，又根据每组里面评论id总数进行由大到小排序
         old_posts = db.session.query(PostsModel).join(CommentModel).group_by(PostsModel.id).order_by(func.count(CommentModel.id).desc()).filter(PostsModel.title.like('%'+search+'%'))
     else:
         old_posts = PostsModel.query.filter_by(is_delete=1).filter(PostsModel.title.like('%'+search+'%'))
@@ -87,14 +87,34 @@ def front_home_page():
 
 # 帖子详情页面
 def posts_detail(posts_id):
-    posts = PostsModel.query.get(posts_id)
+    posts = db.session.query(PostsModel).get(posts_id)
+    comments = db.session.query(CommentModel).filter_by(posts_id=posts_id, is_delete=1).order_by(CommentModel.id.desc()).all()
+    context = {
+        'posts': posts,
+        'comments': comments,
+    }
     if posts:
         # 每访问一次这个read_count字段数据就加1
         posts.read_count += 1
         db.session.commit()
-        return render_template('front/front_posts_detail.html', posts=posts)
+        return render_template('front/front_posts_detail.html', **context)
     else:
         return restful.params_errors(message='帖子不存在')
+
+
+# 删除评论
+@front_bp.route('/delete_comment/', methods=['POST'])
+def delete_comment():
+    comment_id = request.form.get('comment_id')
+    print(comment_id)
+    if not comment_id:
+        return restful.params_errors(message='评论不存在')
+    comment = CommentModel.query.get(comment_id)
+    if not comment:
+        return restful.params_errors(message='评论不存在')
+    comment.is_delete = 0
+    db.session.commit()
+    return restful.success()
 
 
 # 个人中心
@@ -102,11 +122,52 @@ def front_profile():
     return render_template('front/front_profile.html')
 
 
+# 更换头像。在前端点击'保存'，通过js的ajax的post请求就会访问这个/add_head_portrait/。
+@front_bp.route('/add_head_portrait/', methods=['POST'])
+def add_head_portrait():
+    add_head_portrait_form = AddHeadPortraitForm(request.form)
+    if add_head_portrait_form.validate():
+        image_url = add_head_portrait_form.image_url.data
+        front_user_id = add_head_portrait_form.front_user_id.data
+        print("front_user_id", front_user_id)
+        Front_User = db.session.query(FrontUser).get(front_user_id)
+        if Front_User:
+            Front_User.head_portrait = image_url
+            db.session.commit()
+            return restful.success()
+        else:
+            return restful.params_errors(message='用户不存在')
+    else:
+        return restful.params_errors(message=add_head_portrait_form.get_form_error_message())
+
+
+# 修改用户名和个性签名
+@front_bp.route('/updata_front_username_signature/', methods=['POST'])
+def updata_front_username():
+    front_user_id = request.form.get('front_user_id')
+    input_values = request.form.get('input_values')
+    old_value = request.form.get('old_value')
+
+    Front_User = db.session.query(FrontUser).get(front_user_id)
+    if Front_User:
+        if old_value == Front_User.username:
+            Front_User.username = input_values
+            print("走的用户名", front_user_id, input_values)
+        elif old_value == Front_User.signature:
+            Front_User.signature = input_values
+            print("走的签名", front_user_id, input_values)
+        db.session.commit()
+        return restful.success()
+    else:
+        return restful.params_errors(message='用户不存在')
+
+
+
 # 把图形验证码映射到前端页面。
 # 一个图片充当返回值，要映射到前端页面，必须得把图片保存到字节流流中,然后Response(out.read(), mimetype='image/png')
 def graph_captcha():
     try:
-        # text生成的验证码 。image就是图形验证码图片
+        # text生成的验证码 。image就是图形验证码,是一张图片
         text, image = Captcha.gene_graph_captcha()
         # BytesIO 字节流
         out = BytesIO()

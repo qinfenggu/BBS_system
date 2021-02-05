@@ -21,12 +21,9 @@ class FrontUser(db.Model):
     telephone = db.Column(db.String(11), nullable=False, unique=True)
     username = db.Column(db.String(50), nullable=False)
     _password = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(100), unique=True)
-    # realname真实姓名，head_portrait头像，signature个性签名
-    realname = db.Column(db.String(50))
+    # head_portrait头像，signature个性签名
     head_portrait = db.Column(db.String(100))
-    signature = db.Column(db.String(100))
-    gender = db.Column(db.Enum(GenderEnum), default=GenderEnum.UNKNOW)
+    signature = db.Column(db.String(100), default="此人很懒什么也没有留下.....")
 
     create_time = db.Column(db.DateTime, default=datetime.now)
 
@@ -78,7 +75,7 @@ class PostsModel(db.Model):
     author = db.relationship("FrontUser", backref="posts")
     is_delete = db.Column(db.Integer, default=1)
 
-    # 因为前端那边保存上来的是一个TTXT文本，不是HTML格式。下面这个方法是对保存上来的文本进行HTML格式处理
+    # 因为前端那边保存上来的是一个TTXT文本，不是HTML格式。下面这个方法是对保存上来的文本进行HTML格式处理,保存成markdown格式
     @staticmethod
     def on_changed_content(target, value, oldvalue, initiator):
         allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
@@ -110,5 +107,6 @@ class CommentModel(db.Model):
 
     author = db.relationship("FrontUser", backref="comment")
     posts = db.relationship("PostsModel", backref="comment")
+
 
 

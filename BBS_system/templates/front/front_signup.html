@@ -20,9 +20,10 @@
     <div class="outer-box">
         <div class="logo-box">
             <a href="/">
-                <img src="{{ url_for('static',filename='common/images/logo.png') }}"/>
+                <img src="{{ url_for('static',filename='common/images/logo1.jpg') }}" style="height: 150px; width: 150px"/>
             </a>
         </div>
+        <br>
         <h2 class="page-title">逻辑论坛注册</h2>
 
         <div class="sign-box">
@@ -48,15 +49,9 @@
             <div class="form-group">
                 <input type="password" name="password2" class="form-control" placeholder="确认密码">
             </div>
-            <div class="form-group">
-                <div class="input-group">
-                    <input type="text" name="graph_captcha" class="form-control" placeholder="图形验证码">
 
-                    <span class="input-group-addon captcha-addon">
-                        <img id="captcha-img" class="captcha-img" src="{{ url_for('front.graph_captcha') }}" alt="">
-                    </span>
-                </div>
-            </div>
+            {% include 'front/front_granh_captcha.html' %}
+
             <div class="form-group">
                 <span style="display:none" id="return-to-span">{{ return_to }}</span>
                 <button class="btn btn-warning btn-block" id="submit-btn">

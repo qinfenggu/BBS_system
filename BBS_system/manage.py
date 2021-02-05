@@ -29,13 +29,12 @@ def create_role():
     # 访问者
     visitor = CMSRole(name='访问者', describe='只可访问，无法修改任何数据', permissions=CMSPersmission.VISITOR)
     # 运营人员
-    operator = CMSRole(name='运营人员', describe='访问，帖子，评论，前台用户管理',
-                      permissions=CMSPersmission.VISITOR | CMSPersmission.POSTER | CMSPersmission.COMMENTER
-                                  | CMSPersmission.FRONTUSER)
+    operator = CMSRole(name='运营人员', describe='访问，帖子',
+                      permissions=CMSPersmission.VISITOR | CMSPersmission.POSTER)
     # 管理员
-    admin = CMSRole(name='管理员', describe='访问，帖子，评论，板块，前台用户管理',
+    admin = CMSRole(name='管理员', describe='访问，帖子，评论，板块',
                       permissions=CMSPersmission.VISITOR | CMSPersmission.POSTER | CMSPersmission.COMMENTER
-                                  | CMSPersmission.BOARDER | CMSPersmission.FRONTUSER)
+                                  | CMSPersmission.BOARDER)
     # 开发者
     developer = CMSRole(name='开发者', describe='所以权限', permissions=CMSPersmission.ALL_PERMISSION)
 

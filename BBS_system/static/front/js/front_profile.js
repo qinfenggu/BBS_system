@@ -29,39 +29,22 @@ $(function () {
         event.preventDefault();
         var self = $(this);
         var dialog = $("#banner-dialog");
-        var nameInput = $("input[name='name']");
         var imageInput = $("input[name='image_url']");
-        var linkInput = $("input[name='link_url']");
-        var priorityInput = $("input[name='priority']");
 
-
-        var name = nameInput.val();
         var image_url = imageInput.val();
-        var link_url = linkInput.val();
-        var priority = priorityInput.val();
-        var submitType = self.attr('data-type');
-        var bannerId = self.attr("data-id");
 
-        if(!name || !image_url || !link_url || !priority){
-            lgalert.alertInfoToast('请输入完整的轮播图数据！');
+
+        if(!image_url){
+            lgalert.alertInfoToast('请添加图片！');
             return;
         }
 
-        var url = '';
-        if(submitType == 'update'){
-            url = '/cms/update_banner/';
-        }else{
-            url = '/cms/add_banner/';
-        }
         // form 发送 <form action="提交的地址" method="post">
         lgajax.post({
-            "url": url,
+            "url": '/add_head_portrait/',
             'data':{
-                'name':name,
                 'image_url': image_url,
-                'link_url': link_url,
-                'priority':priority,
-                'banner_id': bannerId
+                'front_user_id': front_user_id
             },
             'success': function (data) {
                 dialog.modal("hide");
@@ -78,6 +61,45 @@ $(function () {
         });
     });
 });
+
+
+
+$(function () {
+    $(".edit-board-btn").click(function () {
+        var self = $(this);
+        var tr = self.parent().parent();
+        var old_value = tr.attr('data-name');
+        var front_user_id = tr.attr("data-id");
+
+
+        lgalert.alertOneInput({
+            // 这text在弹出框是显示请输入
+            'text': '',
+            // 这个是输入框里面默认输入的内容
+            'placeholder': old_value,
+            // 这个是获取值
+            'confirmCallback': function (inputValue) {
+                lgajax.post({
+                    'url': '/updata_front_username_signature/',
+                    'data': {
+                        'front_user_id': front_user_id,
+                        'input_values': inputValue,
+                        'old_value': old_value
+                    },
+                    'success': function (data) {
+                        if(data['code'] == 200){
+                            window.location.reload();
+                        }else{
+                            lgalert.alertInfo(data['message']);
+                        }
+                    }
+                });
+            }
+        });
+    });
+});
+
+
 
 $(function () {
     $(".edit-banner-btn").click(function (event) {
@@ -106,31 +128,9 @@ $(function () {
     });
 });
 
-$(function () {
-    $(".delete-banner-btn").click(function (event) {
-        var self = $(this);
-        var tr = self.parent().parent();
-        var banner_id = tr.attr('data-id');
-        lgalert.alertConfirm({
-            "msg":"您确定要删除这个轮播图吗？",
-            'confirmCallback': function () {
-                lgajax.post({
-                    'url': '/cms/delete_banner/',
-                    'data':{
-                        'banner_id': banner_id
-                    },
-                    'success': function (data) {
-                        if(data['code'] == 200){
-                            window.location.reload();
-                        }else{
-                            lgalert.alertInfo(data['message']);
-                        }
-                    }
-                })
-            }
-        });
-    });
-});
+
+
+
 
 
 // 七牛云JS初始化

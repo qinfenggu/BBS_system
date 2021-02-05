@@ -1,0 +1,110 @@
+{% extends 'cms/cms_base.html' %}
+
+{% block title %}
+后台用户管理
+{% endblock %}
+
+{% block page_title %}
+<!--继承title的block所有的内容-->
+{{ self.title() }}
+{% endblock %}
+
+{% block head %}
+<script src="{{ url_for('static', filename='cms/js/cmsuser_manage.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+
+<div class="top-box">
+    <button class="btn btn-warning" data-toggle="modal" data-target="#banner-dialog">添加新管理员</button>
+</div>
+
+<table class="table table-bordered">
+    <thead>
+    <tr>
+        <th>管理员</th>
+        <th>角色</th>
+        <th>邮箱</th>
+        <th>创建时间</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for cms_user in cms_users %}
+        <tr data-name="{{ cms_user.username }}" data-id="{{ cms_user.id }}">
+            <td>{{ cms_user.username }}</td>
+            <td>{% for cms_user_role in cms_user.roles %}
+                    {{ cms_user_role.name }}
+                {% endfor %}
+            </td>
+
+
+            <td>{{ cms_user.email }}</td>
+            <td>{{ cms_user.create_time }}</td>
+            <td>
+                <button class="btn btn-default btn-xs edit-board-btn">添增新角色</button>
+                <button class="btn btn-danger btn-xs delete-board-btn">删除</button>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<div class="modal fade" id="banner-dialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="myModalLabel">添加新管理员</h4>
+            </div>
+            <div class="modal-body">
+                <form action="" class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">用户名：</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" name="username" placeholder="请输入用户名">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">密码：</label>
+                        <div class="col-sm-10">
+                            <input type="password" class="form-control" name="password" placeholder="请输入密码">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">再次确认密码：</label>
+                        <div class="col-sm-10">
+                            <input type="password" class="form-control" name="password2" placeholder="请再次确认密码">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">邮箱：</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" name="email" placeholder="请输入邮箱地址">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">角色：</label>
+                        <div class="col-sm-10">
+                            <input type="number" class="form-control" name="role" placeholder="1访问者 2运营人员 3管理员 4开发者">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" id="save-banner-btn">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+

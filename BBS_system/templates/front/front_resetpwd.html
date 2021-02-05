@@ -10,6 +10,7 @@
         }
     </style>
     <script src="{{ url_for('static', filename='front/js/resetpwd.js') }}"></script>
+    <link href="{{ url_for('static', filename='front/css/front_signbase.css') }}" rel="stylesheet">
 {% endblock %}
 
 {% block main_content %}
@@ -34,6 +35,7 @@
                     <input type="password" class="form-control" name="newpwd2" placeholder="请输入确认密码">
                 </div>
             </div>
+            {% include 'front/front_granh_captcha.html' %}
             <div class="form-group">
                 <button class="btn btn-primary" id="submit">立即保存</button>
             </div>

@@ -72,17 +72,11 @@
                   {% if  user.has_permissions(CMSPersmission.BOARDER) %}
                     <li class="board-manage"><a href="{{ url_for('cms.boards') }}">板块管理</a></li>
                   {% endif %}
-                  {% if  user.has_permissions(CMSPersmission.FRONTUSER) %}
-                    <li class="nav-group user-manage"><a href="#">前台用户管理</a></li>
-                  {% endif %}
+
                   {% if  user.has_permissions(CMSPersmission.CMSUSER) %}
-                    <li class="cmsuser-manage"><a href="#">后台用户管理</a></li>
+                    <li class="cmsuser-manage"><a href="{{ url_for('cms.cmsuser_manage') }}">后台用户管理</a></li>
                   {% endif %}
 
-                  <!--判断是否是开发人员，有就显示CMS组管理页面-->
-                  {% if  user.is_developer%}
-                  <li class="cmsrole-manage"><a href="#">角色管理</a></li>
-                  {% endif %}
             </ul>
           </div>
           <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">

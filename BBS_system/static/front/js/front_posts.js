@@ -42,7 +42,8 @@ $(function () {
             'data': {
                 'title': title,
                 'content':content,
-                'board_id': board_id
+                'board_id': board_id,
+                // 'contentText': contentText
             },
             'success': function (data) {
                 if(data['code'] == 200){
@@ -51,7 +52,7 @@ $(function () {
                         'cancelText': '回到首页',
                         'confirmText': '再发一篇',
                         'cancelCallback': function () {
-                            window.location = '/';
+                            window.location = '/front_home_page/';
                         },
                         'confirmCallback': function () {
                             titleInput.val("");

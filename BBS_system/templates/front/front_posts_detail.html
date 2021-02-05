@@ -3,11 +3,25 @@
 {% block title %}帖子详情{% endblock %}
 
 {% block head %}
-<!--百度富文本：ueditor-->
-<script src="{{ url_for('static', filename='ueditor/ueditor.config.js') }}"></script>
-<script src="{{ url_for('static', filename='ueditor/ueditor.all.min.js') }}"></script>
-<link rel="stylesheet" href="{{ url_for('static', filename='front/css/front_posts_pdetail.css') }}">
-<script src="{{ url_for('static', filename='front/js/front_posts_pdetail.js') }}"></script>
+<!--百度副文本：ueditor-->
+    <script src="{{ url_for('static', filename='ueditor/ueditor.config.js') }}"></script>
+    <script src="{{ url_for('static', filename='ueditor/ueditor.all.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='front/css/front_posts_pdetail.css') }}">
+    <script src="{{ url_for('static', filename='front/js/front_posts_pdetail.js') }}"></script>
+
+    <script type="text/javascript">// <![CDATA[
+            function ShowHide(divId)
+            {
+            if(document.getElementById(divId).style.display == 'none')
+            {
+            document.getElementById(divId).style.display='block';
+            }
+            else
+            {
+            document.getElementById(divId).style.display = 'none';
+            }
+            }
+    // ]]></script>
 {% endblock %}
 
 {% block main_content %}
@@ -19,50 +33,56 @@
                 <span>发表时间：{{ posts.create_time }}</span>
                 <span>作者：{{ posts.author.username }}</span>
                 <span>所属板块：{{ posts.board.name }}</span>
-                <span>阅读数：{{ posts.comment | length }}</span>
-                <span>评论数：{{ posts.read_count }}</span>
+                <span>阅读数：{{ posts.read_count }}</span>
+                <span>评论数：{{ comments |length }}</span>
             </p>
+            <br><br><br>
             <article class="post-content" id="post-content" data-id="{{ posts.id }}">
-                {{ posts.content_html | safe}}
+                {{ posts.content_html |safe}}
             </article>
         </div>
 
         <div class="comment-group">
             <h3>评论列表</h3>
             <ul class="comment-list-group">
-                {% for comment in posts.comment %}
-                    {% if comment.is_delete == 1 %}
-                        <li>
-                            <div class="avatar-group">
-                                <img src="{{ url_for('static', filename='common/images/logo.png') }}"
-                                     alt="">
-                            </div>
-                            <div class="comment-content">
-                                <p class="author-info">
-                                    <span>{{ comment.author.username }}</span>
-                                    <span>{{ comment.create_time }}</span>
-                                </p>
-                                <p class="comment-txt">
-                                    {{ comment.content|safe }}
-                                </p>
-                            </div>
-                        </li>
-                    {% endif %}
-                {% endfor %}
+                    {% for comment in comments %}
+                            <li>
+                                <div class="avatar-group">
+                                    <img src="{{ url_for('static', filename='common/images/logo.png') }}"
+                                         alt="">
+                                </div>
+                                <div class="comment-content" id="comment-content" data-id="{{ comment.id }}">
+                                    <p class="author-info">
+                                        <span>{{ comment.author.username }}</span>
+                                        <span>{{ comment.create_time }}</span>
+
+                                    </p>
+                                    <p class="comment-txt">
+                                        {{ comment.content|safe }}
+                                    </p>
+                                </div>
+                                {% set user = g.front_user %}
+                                {% if user.id == comment.author_id %}
+                                    <button class="btn btn-danger btn-xs">删除</button>
+                                {% endif %}
+                            </li>
+                    {% endfor %}
 
             </ul>
         </div>
-
 
         <div class="add-comment-group">
             <h3>发表评论</h3>
             <script id="editor" type="text/plain" style="height:100px;"></script>
 
-                   <div class="comment-btn-group">
+                  <div class="comment-btn-group">
                      <button class="btn btn-primary" id="comment-btn" data-id="{{ posts.id }}">发表评论</button>
                   </div>
         </div>
-                  <div class="sm-container"></div>
+
+        <div class="sm-container"></div>
+
+
     </div>
-{% endblock %}
 </div>
+{% endblock %}

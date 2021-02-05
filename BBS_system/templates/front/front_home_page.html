@@ -47,7 +47,7 @@
                 <ul class="post-group-head">
                     <!--带有class="active"都会有深灰色填充-->
                     {% if current_choose == 1 %}
-                        <li class="active"><a href="{{ url_for('front.front_home_page', current_choose=1, board_id= current_board_id) }}">最新</a></li>
+                        <li class="active"><a  href="{{ url_for('front.front_home_page', current_choose=1, board_id= current_board_id) }}">最新</a></li>
                     {% else %}
                         <li class=""><a href="{{ url_for('front.front_home_page', current_choose=1, board_id= current_board_id) }}">最新</a></li>
                     {% endif %}
@@ -58,13 +58,14 @@
                         <li class=""><a href="{{ url_for('front.front_home_page', current_choose=2, board_id= current_board_id) }}">精华帖子</a></li>
                     {% endif %}
 
-                     {% if current_choose == 3 %}
-                        <li class="active"><a href="{{ url_for('front.front_home_page', current_choose=3, board_id= current_board_id) }}">点赞最多</a></li>
+                    {% if current_choose == 3 %}
+                        <li class="active"><a href="{{ url_for('front.front_home_page', current_choose=3, board_id= current_board_id) }}">浏览最多</a></li>
                     {% else %}
-                        <li class=""><a href="{{ url_for('front.front_home_page', current_choose=3, board_id= current_board_id) }}">点赞最多</a></li>
+                        <li class=""><a href="{{ url_for('front.front_home_page', current_choose=3, board_id= current_board_id) }}">浏览最多</a></li>
                     {% endif %}
 
-                     {% if current_choose == 4 %}
+
+                    {% if current_choose == 4 %}
                         <li class="active"><a href="{{ url_for('front.front_home_page', current_choose=4, board_id= current_board_id) }}">评论最多</a></li>
                     {% else %}
                         <li class=""><a href="{{ url_for('front.front_home_page', current_choose=4, board_id= current_board_id) }}">评论最多</a></li>
@@ -76,7 +77,12 @@
                     {% for post in posts %}
                     <li>
                         <div class="author-avatar-group">
-                            <img src="#" alt="">
+                            {% if post.author.head_portrait %}
+                                <img src="{{ post.author.head_portrait }}" alt="">
+                            {% else %}
+                                <img src="{{ url_for('static',filename='common/images/logo2.jpg') }}" alt="">
+                            {% endif %}
+
                         </div>
                         <div class="post-info-group">
                             <p class="post-title">

@@ -2,36 +2,92 @@
 
 {% block title %}个人中心{% endblock %}
 
-
+{% block head %}
+    <script src="https://cdn.staticfile.org/Plupload/2.1.1/moxie.js"></script>
+    <script src="https://cdn.staticfile.org/Plupload/2.1.1/plupload.dev.js"></script>
+    <script src="https://cdn.staticfile.org/qiniu-js-sdk/1.0.14-beta/qiniu.js"></script>
+    <script src="{{ url_for('static', filename='common/js/lgqiniu.js') }}"></script>
+    <script src="{{ url_for('static', filename='front/js/front_profile.js') }}"></script>
+{% endblock %}
 
 {% block main_content %}
-    {% set user = g.front_user %}
+ {% set user = g.front_user %}
+<table class="table table-bordered">
+    <tr data-id="{{ user.id }}">
+        {% if user.head_portrait %}
+            <img src="{{ user.head_portrait }}" style="height: 120px; width: 120px"/>
+        {% else %}
+            <img src="{{ url_for('static',filename='common/images/logo3.png') }}" style="height: 120px; width: 120px"/>
+        {% endif %}
+        <td style="border-bottom:none">
+        <button class="btn btn-default btn-xs edit-banner-btn" style="background: #00d95a;color: white;width:80px;height:40px">更换头像</button>
+        </td>
+    </tr>
+</table>
+    <br>
     <table class="table table-bordered">
-        <tr>
+        <tr data-name="{{ user.username }}" data-id="{{ user.id }}">
             <td>用户名：</td>
             <td>{{ user.username}}</td>
-        </tr>
-        <tr>
-            <td>邮箱：</td>
-            <td>{{ user.email }}</td>
+        <td>
+            <button id="edit" class="btn btn-default btn-xs edit-board-btn" style="background: #00d95a;color: white;width:80px;height:40px">修改用户名</button>
+        </td>
         </tr>
         <tr>
             <td>手机号：</td>
             <td>{{ user.telephone }}</td>
+            <td>
+            <button class="btn btn-default" style="background: #00d95a;color: white;width:80px;height:40px"><a href="{{ url_for('front.FrontResetTelephone') }}" style="color: white;text-decoration:none;">更换号码</a></button>
+        </td>
         </tr>
-         <tr>
-            <td>真实姓名：</td>
-            <td>{{ user.realname }}</td>
-         </tr>
-        <tr>
-            <td>个性签名：</td>
-            <td>{{ user.signature }}</td>
-        </tr>
+        {% if user.signature %}
+            <tr data-name="{{ user.signature }}" data-id="{{ user.id }}">
+                <td>个性签名：</td>
+                <td>{{ user.signature}}</td>
+                <td>
+                    <button class="btn btn-default btn-xs edit-board-btn" style="background: #00d95a;color: white;width:80px;height:40px">修改签名</button>
+                </td>
+            </tr>
+        {% else %}
+            <tr data-name="{{ user.signature }}" data-id="{{ user.id }}">
+               <td>个性签名：</td>
+               <td style="color:grey">你还没有任何个性签名...</td>
+               <td>
+                   <button class="btn btn-default btn-xs edit-board-btn" style="background: #00d95a;color: white;width:80px;height:40px">添加签名</button>
+                </td>
+            </tr>
+        {% endif %}
         <tr>
             <td>注册时间：</td>
             <td>{{ user.create_time }}</td>
+            <td></td>
         </tr>
     </table>
+
+<div class="modal fade" id="banner-dialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="myModalLabel">头像</h4>
+            </div>
+            <div class="modal-body">
+                <form action="" class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">图片：</label>
+                        <div class="col-sm-7">
+                            <input type="text" class="form-control" name="image_url" placeholder="轮播图图片">
+                        </div>
+                        <button class="btn btn-info col-sm-2" id="upload-btn">添加图片</button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" id="save-banner-btn">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
-
-

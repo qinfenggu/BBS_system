@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, views, request, redirect, url_for, session, g, jsonify
 from apps.cms.forms import LoginForm, ResetPwdForm, ResetEmailForm, AddBannerForm, UpdateBannerForm, AddBoardForm, \
-                           UpdateBoardForm
-from apps.cms.models import CMSUser, CMSPersmission, BannerModel, BoardModel, EssencePostsModel
+                           UpdateBoardForm, AddCmsUserForm, UpdateCmsUserRole
+from apps.cms.models import CMSUser, CMSPersmission, BannerModel, BoardModel, EssencePostsModel, CMSRole
 from apps.cms.decorators import permission_required
 from excit import db, mail
 from utils import restful, random_captcha, redis_save_capthcha
@@ -286,21 +286,74 @@ def delete_board():
     return restful.success()
 
 
-# 前台用户管理
-@permission_required(CMSPersmission.FRONTUSER)
-def cms_frontuser_manage_view():
-    return '前台用户'
-
-
 # 后台用户管理
 @permission_required(CMSPersmission.CMSUSER)
 def cms_cmsuser_manage_view():
-    return '后台用户'
+    cms_users = CMSUser.query.filter_by(is_delete=1).all()
+
+    return render_template('cms/cms_cmsuser_manage.html', cms_users=cms_users)
 
 
-# 角色管理
-def cms_roles_view():
-    return '角色'
+# 添加后台用户账号。点击'添加新管理员'，填写完点'确定'，会通过js的ajax的post请求就会访问这个/add_board/。
+@cms_bp.route("/add_cms_user/", methods=['POST'])
+def add_cms_user():
+    add_cmsuser_form = AddCmsUserForm(request.form)
+    if add_cmsuser_form.validate():
+        username = add_cmsuser_form.username.data
+        password = add_cmsuser_form.password.data
+        email = add_cmsuser_form.email.data
+        role = add_cmsuser_form.role.data
+        cms_role = db.session.query(CMSRole).get(role)
+        cms_user = CMSUser(username=username, password=password, email=email)
+        cms_role.users.append(cms_user)
+        db.session.add(cms_user)
+        db.session.commit()
+        return restful.success()
+    else:
+        return restful.params_errors(message=add_cmsuser_form.get_form_error_message())
+
+
+# 修改用户角色
+@cms_bp.route("/update_cms_user_role/", methods=['POST'])
+def update_cms_user_role():
+    update_cmsuer_role_form = UpdateCmsUserRole(request.form)
+    if update_cmsuer_role_form.validate():
+        # 'data_id'原因：看js，那边post请求携带的参数就是'data_id'
+        cms_user_id = request.form.get('cms_user_id')
+        role_id = request.form.get('role_id')
+        if not cms_user_id:
+            return restful.params_errors(message='管理员不存在')
+
+        cms_user = CMSUser.query.get(cms_user_id)
+
+        if not cms_user:
+            return restful.params_errors(message='管理员不存在')
+
+        cms_role = db.session.query(CMSRole).get(role_id)
+        cms_role.users.append(cms_user)
+        db.session.commit()
+        return restful.success()
+    else:
+        return restful.params_errors(message=update_cmsuer_role_form.get_form_error_message())
+
+
+# 删除后台用户。点击'删除'，会通过js的ajax的post请求就会访问这个/delete_cms_user/。
+@cms_bp.route("/delete_cms_user/", methods=['POST'])
+def delete_cms_user():
+    # 'data_id'原因：看js，那边post请求携带的参数就是'data_id'
+    cms_user_id = request.form.get('cms_user_id')
+
+    if not cms_user_id:
+        return restful.params_errors(message='管理员不存在')
+
+    cms_user = CMSUser.query.get(cms_user_id)
+
+    if not cms_user:
+        return restful.params_errors(message='管理员不存在')
+
+    cms_user.is_delete = 0
+    db.session.commit()
+    return restful.success()
 
 
 # 轮播图管理
@@ -371,15 +424,18 @@ def delete_banner():
         return restful.params_errors('轮播图不存在')
 
 
+@cms_bp.route('/text/')
+def Text():
+    return render_template('cms/上传图片到七牛云操作.html')
+
+
 cms_bp.add_url_rule('/home_page/', endpoint='home_page', view_func=cms_home_page)
 cms_bp.add_url_rule('/logout/', endpoint='logout', view_func=cms_logout_view)
 cms_bp.add_url_rule('/profile/', endpoint='profile', view_func=cms_profile_view)
 cms_bp.add_url_rule('/posts/', endpoint='posts', view_func=cms_posts_view)
 cms_bp.add_url_rule('/comments/', endpoint='comments', view_func=cms_comments_view)
 cms_bp.add_url_rule('/boards/', endpoint='boards', view_func=cms_boards_view)
-cms_bp.add_url_rule('/frontuser_manage/', endpoint='frontuser_manage', view_func=cms_frontuser_manage_view)
 cms_bp.add_url_rule('/cmsuser_manage/', endpoint='cmsuser_manage', view_func=cms_cmsuser_manage_view)
-cms_bp.add_url_rule('/roles/', endpoint='roles', view_func=cms_roles_view)
 cms_bp.add_url_rule('/banners/', endpoint='banners', view_func=cms_banners_view)
 
 

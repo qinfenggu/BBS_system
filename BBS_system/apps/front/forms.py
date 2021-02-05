@@ -1,5 +1,5 @@
 from wtforms import Form, StringField, IntegerField
-from wtforms.validators import Length, EqualTo, ValidationError, Regexp, InputRequired
+from wtforms.validators import Length, EqualTo, ValidationError, Regexp, InputRequired, URL
 from utils import redis_save_capthcha
 
 
@@ -13,7 +13,7 @@ class BaseForm(Form):
 class SignUpForm(BaseForm):
     telephone = StringField(validators=[Regexp(r'1[345789]\d{9}', message='请输入合法的手机号码')])
     sms_captcha = StringField(validators=[Length(min=6, max=6, message='请输入正确的短信验证码')])
-    username = StringField(validators=[Length(min=4, max=20, message='请输入由数字和大小写组成的4-20位用户名')])
+    username = StringField(validators=[InputRequired(message='请输入用户名')])
     password1 = StringField(validators=[Regexp(r'[0-9a-zA-Z]'), Length(min=6, max=20, message='请输入由数字和大小写组成的6-20位用户名')])
     password2 = StringField(validators=[EqualTo('password1', message='两次密码输入不一致')])
     graph_captcha = StringField(validators=[Length(min=4, max=4, message='请输入正确的验证码')])
@@ -61,12 +61,23 @@ class FontResetPwdForm(BaseForm):
     oldpwd = StringField(validators=[Length(min=6, max=20, message='请输入6-20位密码')])
     newpwd = StringField(validators=[Length(min=6, max=20, message='请输入6-20位密码')])
     newpwd2 = StringField(validators=[EqualTo('newpwd', message='两次密码输入不一致')])
+    graph_captcha = StringField(validators=[Length(min=4, max=4, message='请输入正确的验证码')])
+
+    # 验证输入的图形验证码与redis里面是否一致
+    def validate_graph_captcha(self, field):
+        graph_captcha = self.graph_captcha.data
+        print(graph_captcha)
+        # 把图形验证码从redis里面取出来。graph_captcha.lower()转小写原因：图形验证码保存到redis时，key就是验证码的小写
+        redis_graph_captcha = redis_save_capthcha.redis_get(graph_captcha.lower())
+        if not redis_graph_captcha:
+            raise ValidationError(message='图形验证码输入错误')
 
 
 # 更换手机号表验证
 class FrontResetTelephoneForm(BaseForm):
     telephone = StringField(validators=[Regexp(r'1[345789]\d{9}', message='请输入合法的手机号码')])
     captcha = StringField(validators=[Length(min=6, max=6, message='请输入正确长度的验证码')])
+    graph_captcha = StringField(validators=[Length(min=4, max=4, message='请输入正确的验证码')])
 
     def validate_captcha(self, field):
         # email = request.form.get('email')
@@ -79,14 +90,23 @@ class FrontResetTelephoneForm(BaseForm):
         if not redis_captcha or captcha.lower() != redis_captcha.lower():
             raise ValidationError('验证码输入错误')
 
+    # 验证输入的图形验证码与redis里面是否一致
+    def validate_graph_captcha(self, field):
+        graph_captcha = self.graph_captcha.data
+        # 把图形验证码从redis里面取出来。graph_captcha.lower()转小写原因：图形验证码保存到redis时，key就是验证码的小写
+        redis_graph_captcha = redis_save_capthcha.redis_get(graph_captcha.lower())
+        if not redis_graph_captcha:
+            raise ValidationError(message='图形验证码输入错误')
+
 
 # 找回密码表单验证
 class FindPasswordForm(BaseForm):
     telephone = StringField(validators=[Regexp(r'1[345789]\d{9}', message='请输入合法的手机号码')])
-    sms_captcha = StringField(validators=[Length(min=6, max=6, message='请输入正确长度的验证码')])
+    sms_captcha = StringField(validators=[Length(min=6, max=6, message='请输入正确的短信验证码')])
 
     newpwd = StringField(validators=[Length(min=6, max=20, message='请输入6-20位密码')])
     newpwd2 = StringField(validators=[EqualTo('newpwd', message='两次密码输入不一致')])
+    graph_captcha = StringField(validators=[Length(min=4, max=4, message='请输入正确的验证码')])
 
     # 验证输入的短信验证码与redis里面是否一致
     def validate_sms_captcha(self, field):
@@ -96,3 +116,17 @@ class FindPasswordForm(BaseForm):
         redis_sms_captcha = redis_save_capthcha.redis_get(telephone)
         if not redis_sms_captcha or redis_sms_captcha != sms_captcha:
             raise ValidationError(message='短信验证码输入错误')
+
+    # 验证输入的图形验证码与redis里面是否一致
+    def validate_graph_captcha(self, field):
+        graph_captcha = self.graph_captcha.data
+        # 把图形验证码从redis里面取出来。graph_captcha.lower()转小写原因：图形验证码保存到redis时，key就是验证码的小写
+        redis_graph_captcha = redis_save_capthcha.redis_get(graph_captcha.lower())
+        if not redis_graph_captcha:
+            raise ValidationError(message='图形验证码输入错误')
+
+
+# 更换头像
+class AddHeadPortraitForm(BaseForm):
+    front_user_id = StringField()
+    image_url = StringField(validators=[InputRequired(message='请输入图片链接'), URL(message='图片链接有误')])

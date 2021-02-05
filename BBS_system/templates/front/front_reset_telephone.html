@@ -10,6 +10,7 @@
         }
     </style>
     <script src="{{ url_for('static', filename='front/js/reset_telephone.js') }}"></script>
+    <link href="{{ url_for('static', filename='front/css/front_signbase.css') }}" rel="stylesheet">
 
 
 
@@ -31,6 +32,7 @@
             <div class="form-group">
                 <input type="text" name="sms_captcha" class="form-control" placeholder="短信验证码">
             </div>
+            {% include 'front/front_granh_captcha.html' %}
             <div class="form-group">
                 <button class="btn btn-primary" id="submit">立即修改</button>
             </div>

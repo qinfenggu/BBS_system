@@ -20,11 +20,8 @@ class CMSPersmission(object):
     # 板块管理权限
     BOARDER         = 0b00001000
 
-    # 前台用户管理权限
-    FRONTUSER       = 0b00010000
-
     # 后台用户管理权限
-    CMSUSER         = 0b00100000
+    CMSUSER         = 0b000100000
 
     # 管理管理员用户权限
     ADMINER         = 0b01000000
@@ -44,6 +41,8 @@ class CMSUser(db.Model):
     username = db.Column(db.String(100), nullable=False)
     _password = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), nullable=False, unique=True)
+    # 1表示为为删除，0表示已删除
+    is_delete = db.Column(db.Integer, default=1)
     create_time = db.Column(db.DateTime, default=datetime.now())
 
     def __init__(self, username, password, email):

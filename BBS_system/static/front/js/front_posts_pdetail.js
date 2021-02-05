@@ -62,3 +62,32 @@ $(function () {
 //        }
     });
 });
+
+
+$(function () {
+    $(".btn-xs").click(function () {
+        var self = $(this);
+        // var tr = self.parent().parent();
+        // var comment_id = tr.attr("data-id");
+        // var comment_id = 3;
+         var comment_id = $("#comment-content").attr("data-id");
+        lgalert.alertConfirm({
+            "msg":"您确定要删除该评论吗？",
+            'confirmCallback': function () {
+                lgajax.post({
+                    'url': '/delete_comment/',
+                    'data':{
+                        'comment_id': comment_id
+                    },
+                    'success': function (data) {
+                        if(data['code'] == 200){
+                            window.location.reload();
+                        }else{
+                            lgalert.alertInfo(data['message']);
+                        }
+                    }
+                })
+            }
+        });
+    });
+});

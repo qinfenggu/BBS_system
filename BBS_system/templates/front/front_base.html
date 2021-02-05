@@ -13,6 +13,11 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='common/sweetalert/sweetalert.css') }}">
     <script src="{{ url_for('static', filename='common/sweetalert/lgalert.js') }}"></script>
     <script src="{{ url_for('static', filename='common/sweetalert/sweetalert.min.js') }}"></script>
+    <style>
+        #login:hover{
+            color:red;
+        }
+    </style>
     {% block head %}
     {% endblock %}
 </head>
@@ -33,7 +38,7 @@
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
-        <li class="active"><a href="{{ url_for('front.front_home_page') }}">首页 <span class="sr-only">(current)</span></a></li>
+        <li class="active"><a href="{{ url_for('front.front_home_page') }}">首页</a></li>
         <!--<li><a href="#">Link</a></li>-->
         <!--<li class="dropdown">-->
           <!--<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>-->
@@ -50,25 +55,38 @@
       </ul>
       <form class="navbar-form navbar-left">
         <div class="form-group">
-          <input type="text" class="form-control" placeholder="Search" name="search">
+          <input type="text" class="form-control" placeholder="查找帖子..." name="search">
         </div>
         <button type="submit" class="btn btn-default" href="{{ url_for('front.front_profile') }}">搜索</button>
       </form>
       <ul class="nav navbar-nav navbar-right">
        {% if g.front_user %}
+           {% set user = g.front_user %}
             <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ g.front_user.username }}<span class="caret"></span></a>
+                {% if user.head_portrait %}
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><img src="{{ user.head_portrait }}" style="height: 30px; width: 30px"/><span class="caret"></span></a>
+                {% else %}
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><img src="{{ url_for('static',filename='common/images/logo2.jpg') }}" style="height: 30px; width: 30px"/><span class="caret"></span></a>
+                {% endif %}
+
+              <!--<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ g.front_user.username }}<span class="caret"></span></a>-->
               <ul class="dropdown-menu">
-                <li><a href="{{ url_for('front.front_profile') }}">个人信息</a></li>
-                <li><a href="{{ url_for('front.FontResetPwd') }}">修改密码</a></li>
-                <li><a href="{{ url_for('front.FrontResetTelephone') }}">更换手机号</a></li>
+
+                <li><a>{{ user.username }}</a></li>
                 <li role="separator" class="divider"></li>
-                <li><a href="{{ url_for('front.front_logout') }}">注销</a></li>
+                <li><a href="{{ url_for('front.front_profile') }}" id="login">个人信息</a></li>
+                <li><a href="{{ url_for('front.FontResetPwd') }}" id="login">修改密码</a></li>
+                <li><a href="{{ url_for('front.FrontResetTelephone') }}" id="login">更换手机号</a></li>
+                <li role="separator" class="divider"></li>
+                <li><a href="{{ url_for('front.front_logout') }}" id="login">注销</a></li>
               </ul>
             </li>
-        {% else %}
-            <li><a href="{{ url_for('front.signin') }}">登录</a></li>
-            <li><a href="{{ url_for('front.signup') }}">注册</a></li>
+       {% else %}
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><img src="{{ url_for('static',filename='common/images/logo3.png') }}" style="height: 30px; width: 30px"/><span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="{{ url_for('front.signin') }}" id="login">登录</a></li>
+            <li><a href="{{ url_for('front.signup') }}" id="login">注册</a></li>
+          </ul>
         {% endif %}
       </ul>
     </div><!-- /.navbar-collapse -->
