@@ -169,6 +169,7 @@ $(function(){
                     lgalert.alertInfo(data['message']);
                 }
             },
+            // 这个没啥用
             'fail': function(){
                 lgalert.alertNetworkError();
             }

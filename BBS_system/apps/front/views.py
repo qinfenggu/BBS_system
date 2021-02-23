@@ -51,13 +51,13 @@ def front_home_page():
         old_posts = PostsModel.query.filter_by(is_delete=1).order_by(PostsModel.create_time.desc()).filter(PostsModel.title.like('%'+search+'%'))
     elif current_choose == 2:
         # 精华帖子。内连接
-        old_posts = db.session.query(PostsModel).join(EssencePostsModel).order_by(EssencePostsModel.create_time.desc()).filter(PostsModel.title.like('%'+search+'%'))
+        old_posts = db.session.query(PostsModel).join(EssencePostsModel).order_by(EssencePostsModel.create_time.desc()).filter(PostsModel.is_delete==1, PostsModel.title.like('%'+search+'%'))
     elif current_choose == 3:
         # 阅读量最多
-        old_posts = PostsModel.query.filter_by(is_delete=1).order_by(PostsModel.read_count.desc(),  PostsModel.create_time.desc()).filter(PostsModel.title.like('%'+search+'%'))
+        old_posts = PostsModel.query.filter_by(is_delete=1).order_by(PostsModel.read_count.desc(),  PostsModel.create_time.desc()).filter(PostsModel.is_delete==1, PostsModel.title.like('%'+search+'%'))
     elif current_choose == 4:
         # 评论最多。把帖子和评论两张表共同的合并，然后根据帖子id进行分组，分成几份组后，又根据每组里面评论id总数进行由大到小排序
-        old_posts = db.session.query(PostsModel).join(CommentModel).group_by(PostsModel.id).order_by(func.count(CommentModel.id).desc()).filter(PostsModel.title.like('%'+search+'%'))
+        old_posts = db.session.query(PostsModel).join(CommentModel).group_by(PostsModel.id).order_by(func.count(CommentModel.id).desc()).filter(PostsModel.is_delete==1, PostsModel.title.like('%'+search+'%'))
     else:
         old_posts = PostsModel.query.filter_by(is_delete=1).filter(PostsModel.title.like('%'+search+'%'))
 
@@ -235,6 +235,7 @@ class SignupView(views.MethodView):
             db.session.add(user)
             db.session.commit()
             # 这里注册成功为什么不写重定向：在js的ajax里面已经写了，注册成功会跳转到主页或者来到这个注册页面的上一个URL页面
+            session['front_user_id'] = user.id
             return restful.success()
         else:
             return restful.params_errors(message=signup_form.get_form_error_message())

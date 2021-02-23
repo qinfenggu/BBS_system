@@ -54,7 +54,7 @@ $(function () {
                 'newpwd': newpwd,
                 'newpwd2': newpwd2
             },
-            // 成功表单验证通过
+            // 表单验证通过
             'success': function (data) {
                 // console.log(data);
                 if(data['code'] == 200){

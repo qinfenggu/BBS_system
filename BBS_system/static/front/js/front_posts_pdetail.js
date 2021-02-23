@@ -66,7 +66,8 @@ $(function () {
 
 $(function () {
     $(".btn-xs").click(function () {
-        var self = $(this);
+        event.preventDefault();
+        // var self = $(this);
         // var tr = self.parent().parent();
         // var comment_id = tr.attr("data-id");
         // var comment_id = 3;
@@ -91,3 +92,4 @@ $(function () {
         });
     });
 });
+

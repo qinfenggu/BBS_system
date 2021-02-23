@@ -26,7 +26,6 @@ var lgajax = {
 
 $(function () {
 
-
     $("#submit-btn").click(function (event) {
         event.preventDefault();
         var titleInput = $('input[name="title"]');
