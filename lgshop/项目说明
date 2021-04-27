@@ -1,0 +1,67 @@
+"""
+未完成部分：我的订单、对接支付宝
+"""
+
+python版本：3.6
+django版本:2.2
+mysql数据库版本:5.7
+需要安装：pip install django-redis， pip install Celery==4.4.7, pip install QQloginTool
+需要短信云平台使用容联：pip install ronglian_sms_sdk
+
+需要打开C:\Windows\System32\drivers\etc\hosts   在里面加上：127.0.0.1 www.meiduo.site
+需要执行：mysql -h127.0.0.1 -uroot -proot lg_shop < D:\python_projext\lgshop\areas.sql
+需要：pip install fdfs_client-py-master.zip
+需要在client.conf文件里：tracker_server= 云服务器ip:22122；base_path=D:xxxx\lgshop\static\images
+需要往商品表插入数据：复制居然给的goods_data.sql表里面的代码，直接去sqlyog里面执行。
+需要：pip install django-haystack；pip install elasticsearch==2.4.1
+
+source root：需要设置lghome、apps这两个
+
+商品信息的那么多表关系:看django项目项目-商城系统第二章
+
+
+文件说明：
+    apps.users:登录注册的app
+    apps.verifications:图形验证码和短信验证码的app
+    apps.oauth:qq登录的app
+
+
+
+
+
+
+问题:
+1、apps\oauth\views.py.QQAuthUserView类：
+        # 创建工具对象
+        oauth = OAuthQQ(client_id=settings.QQ_CLIENT_ID, client_secret=settings.QQ_CLIENT_SECRET,
+                            redirect_uri=settings.QQ_REDIRECT_URI)
+
+为啥没有state=next
+
+2、   D:\python_projext\lgshop\static\js\detail.js里面的// 保存用户浏览记录save_browse_histories()和
+D:\python_projext\lgshop\static\js\user_center_info.js 里面的// 请求浏览历史记录browse_histories(){
+  	let url = '/users/browse_histories/';如果不加/      let url = 'users/browse_histories/';为啥会是其他url
+}
+可自行测试
+
+
+3、商品规格选项及商品规格选项参数代码
+
+4、对购物车数量增减和删除购物车这些操作后，重新显示的页面不了解，因为并没有操作完成后进行get请求。并且代码里面操作后返回的结果：
+对购物车数量增减：返回当前购物车的新数据
+cart_sku = {
+                'id': sku_id,
+                'default_image_url': sku.default_image.url,
+                'name': sku.name,
+                'price': sku.price,
+                'count': count,
+                'amount': sku.price * count,
+                'selected': selected
+            }
+
+删除购物车后返回的数据： return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'OK'})。
+
+5、购物车点'全选'操作后，所有的购物车商品全部被选中或全部取消的显示页面不了解怎么显示的。点'全选'操作后返回的数据：
+ return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'OK'})。
+
+
