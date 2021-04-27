@@ -1,0 +1,12 @@
+短信验证码使用容联云:注册时发送短信验证码的手机号必须是居然老师的18646175116。自己手机号不行
+短信验证码使用celery模式：pip install eventlet； pip install celery==4.2.0
+
+头像图片保存到七牛云上：对象存储或者自己搭建一个FastDFS服务器： pip install qiniu
+对接支付宝：pip install python-alipay-sdk==2.1.1
+
+本次没有使用三级联动:
+
+图片是保存到七牛云上的，需要每个月都需要更换一次七牛云域名：去到home\lghome\constants.py
+
+
+买家账号：yufgbd9198@sandbox.com   登录密码和支付密码：111111
