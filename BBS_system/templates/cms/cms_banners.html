@@ -33,7 +33,7 @@
         <th>名称</th>
         <th>图片链接</th>
         <th>跳转链接</th>
-        <th>优先级</th>
+        <!--<th>优先级</th>-->
         <th>创建时间</th>
         <th>操作</th>
     </tr>
@@ -41,13 +41,13 @@
     <tbody>
     {% for banner in banners %}
     <!--is_delete等于1才显示数据，等于0是表示删除，假删 -->
-        {% if banner.is_delete == 1 %}
+        {% if banner.is_delete == 0 %}
             <tr data-name="{{ banner.name }}" data-image="{{ banner.image_url }}" data-link="{{ banner.link_url }}"
                 data-priority="{{ banner.priority }}" data-id="{{ banner.id }}">
                 <td>{{ banner.name }}</td>
                 <td><a href="{{ banner.image_url }}" target="_blank">{{ banner.image_url|truncate(length=20) }}</a></td>
                 <td><a href="{{ banner.link_url }}" target="_blank">{{ banner.link_url|truncate(length=20) }}</a></td>
-                <td>{{ banner.priority }}</td>
+                <!--<td>{{ banner.priority }}</td>-->
                 <td>{{ banner.create_time }}</td>
                 <td>
                     <button class="btn btn-default btn-xs edit-banner-btn">编辑</button>
@@ -89,12 +89,12 @@
                             <input type="text" class="form-control" name="link_url" placeholder="跳转链接">
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label class="col-sm-2 control-label">权重：</label>
-                        <div class="col-sm-10">
-                            <input type="number" class="form-control" name="priority" placeholder="优先级">
-                        </div>
-                    </div>
+                    <!--<div class="form-group">-->
+                        <!--<label class="col-sm-2 control-label">权重：</label>-->
+                        <!--<div class="col-sm-10">-->
+                            <!--<input type="number" class="form-control" name="priority" placeholder="优先级">-->
+                        <!--</div>-->
+                    <!--</div>-->
                 </form>
             </div>
             <div class="modal-footer">

@@ -48,6 +48,7 @@ class ReleasePostsForm(BaseForm):
     title = StringField(validators=[InputRequired(message='请输入标题')])
     board_id = IntegerField(validators=[InputRequired(message='请输入板块ID')])
     content = StringField(validators=[InputRequired(message='请输入内容')])
+    # contentText = StringField(validators=[InputRequired(message='请输入内容')])
 
 
 # 发表评论表单验证
@@ -76,8 +77,8 @@ class FontResetPwdForm(BaseForm):
 # 更换手机号表验证
 class FrontResetTelephoneForm(BaseForm):
     telephone = StringField(validators=[Regexp(r'1[345789]\d{9}', message='请输入合法的手机号码')])
-    captcha = StringField(validators=[Length(min=6, max=6, message='请输入正确长度的验证码')])
-    graph_captcha = StringField(validators=[Length(min=4, max=4, message='请输入正确的验证码')])
+    captcha = StringField(validators=[Length(min=6, max=6, message='请输入正确长度的短信验证码')])
+    graph_captcha = StringField(validators=[Length(min=4, max=4, message='请输入正确的图形验证码')])
 
     def validate_captcha(self, field):
         # email = request.form.get('email')
@@ -86,9 +87,11 @@ class FrontResetTelephoneForm(BaseForm):
         captcha = self.captcha.data
         # 从redis里面取验证码出来
         redis_captcha = redis_save_capthcha.redis_get(telephone)
+        print('captcha:', captcha)
+        print('redis_captcha:', redis_captcha)
 
-        if not redis_captcha or captcha.lower() != redis_captcha.lower():
-            raise ValidationError('验证码输入错误')
+        if captcha != redis_captcha:
+            raise ValidationError('短信验证码输入错误')
 
     # 验证输入的图形验证码与redis里面是否一致
     def validate_graph_captcha(self, field):

@@ -8,7 +8,8 @@
     用户名--没你可爱  密码--123456  手机号--18059007673
 【】第三方平台
     短信验证发送平台：云片，需要安装：pip install yunpian-python-sdk
-    前台头像、轮播图存储空间平台：七牛云 需要安装：pip install qiniu。测试域名有效期是30天，需要在七牛云重创空间管理，把测试域名复制替换到static\cms\js\banners.js:qnjby4bk8.hd-bkt.clouddn.com/
+    前台头像、轮播图存储空间平台：七牛云 需要安装：pip install qiniu。测试域名有效期是30天，需要在七牛云重创空间管理，把测试域名复制替换到
+             static\cms\js\banners.js:qnjby4bk8.hd-bkt.clouddn.com/和D:\python_projext\BBS_system\static\front\js\front_profile.js
     发布帖子平台：editor.md平台
     发表评论平台：百度编译器。ueditor
 	github:仓库别名：BBS。支线在dev

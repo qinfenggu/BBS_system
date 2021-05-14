@@ -33,30 +33,13 @@
             <button id="edit" class="btn btn-default btn-xs edit-board-btn" style="background: #00d95a;color: white;width:80px;height:40px">修改用户名</button>
         </td>
         </tr>
+
         <tr>
             <td>手机号：</td>
             <td>{{ user.telephone }}</td>
-            <td>
-            <button class="btn btn-default" style="background: #00d95a;color: white;width:80px;height:40px"><a href="{{ url_for('front.FrontResetTelephone') }}" style="color: white;text-decoration:none;">更换号码</a></button>
-        </td>
+            <td></td>
         </tr>
-        {% if user.signature %}
-            <tr data-name="{{ user.signature }}" data-id="{{ user.id }}">
-                <td>个性签名：</td>
-                <td>{{ user.signature}}</td>
-                <td>
-                    <button class="btn btn-default btn-xs edit-board-btn" style="background: #00d95a;color: white;width:80px;height:40px">修改签名</button>
-                </td>
-            </tr>
-        {% else %}
-            <tr data-name="{{ user.signature }}" data-id="{{ user.id }}">
-               <td>个性签名：</td>
-               <td style="color:grey">你还没有任何个性签名...</td>
-               <td>
-                   <button class="btn btn-default btn-xs edit-board-btn" style="background: #00d95a;color: white;width:80px;height:40px">添加签名</button>
-                </td>
-            </tr>
-        {% endif %}
+
         <tr>
             <td>注册时间：</td>
             <td>{{ user.create_time }}</td>
@@ -77,7 +60,7 @@
                     <div class="form-group">
                         <label class="col-sm-2 control-label">图片：</label>
                         <div class="col-sm-7">
-                            <input type="text" class="form-control" name="image_url" placeholder="轮播图图片">
+                            <input type="text" class="form-control" name="image_url" placeholder="请选择头像">
                         </div>
                         <button class="btn btn-info col-sm-2" id="upload-btn">添加图片</button>
                     </div>

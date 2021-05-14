@@ -72,7 +72,7 @@ class CMSLoginView(views.MethodView):
                 session['user_id'] = user.id
                 if remember:
                     session.permanent = True
-                return redirect(url_for('cms.home_page'))
+                return redirect(url_for('cms.profile'))
             else:
                 return self.get(error_message='邮箱地址或密码不正确')
         else:
@@ -102,22 +102,22 @@ class ResetPwdView(views.MethodView):
             return restful.params_errors(message=reset_form.get_form_error_message())
 
 
-# 修改邮箱
-class ResetMailView(views.MethodView):
-    def get(self):
-        return render_template('cms/cms_resetemail.html')
-
-    def post(self):
-        reset_form = ResetEmailForm(request.form)
-        if reset_form.validate():
-            email = reset_form.email.data
-            # user就是 CMSUser.query.get(user_id)
-            user = g.user
-            user.email = email
-            db.session.commit()
-            return restful.success()
-        else:
-            return restful.params_errors(message=reset_form.get_form_error_message())
+# # 修改邮箱
+# class ResetMailView(views.MethodView):
+#     def get(self):
+#         return render_template('cms/cms_resetemail.html')
+#
+#     def post(self):
+#         reset_form = ResetEmailForm(request.form)
+#         if reset_form.validate():
+#             email = reset_form.email.data
+#             # user就是 CMSUser.query.get(user_id)
+#             user = g.user
+#             user.email = email
+#             db.session.commit()
+#             return restful.success()
+#         else:
+#             return restful.params_errors(message=reset_form.get_form_error_message())
 
 
 # 发送邮箱。利用ajax，当点HTML的获取验证码按钮后就会触发这个/email_captcha/，从而触发这个get请求
@@ -144,7 +144,7 @@ class EmailCaptchaView(views.MethodView):
 # 帖子管理。@permission_required装饰器是在执行cms_posts_view之前进行判断当前用户是否拥有帖子权限
 @permission_required(CMSPersmission.POSTER)
 def cms_posts_view():
-    posts = PostsModel.query.filter(PostsModel.is_delete == 1).order_by(PostsModel.id).all()
+    posts = PostsModel.query.filter(PostsModel.is_delete == 0).order_by(PostsModel.id).all()
     return render_template('cms/cms_posts.html', posts=posts)
 
 
@@ -156,7 +156,7 @@ def become_essence_posts_view():
     if posts_id:
         posts = PostsModel.query.get(posts_id)
         if posts:
-            #  essence_posts = EssencePostsModel(字段=值)原因，没有字段需要设置值呀，id和create_time都会自己添加
+            #  没有essence_posts = EssencePostsModel(字段=值)原因，没有字段需要设置值呀，id和create_time都会自己添加
             essence_posts = EssencePostsModel()
             essence_posts.posts = posts
             db.session.add(essence_posts)
@@ -187,14 +187,14 @@ def unbecome_essence_posts_view():
         return restful.params_errors(message="请传入帖子id")
 
 
-# 你鼠标选中这个帖子时标签里面自动添加属性post_id==posts.id
+# 删除帖子。你鼠标选中这个帖子时标签里面自动添加属性post_id==posts.id
 @cms_bp.route('/delete_essence_posts/', methods=['POST'])
-def delete_essence_posts():
+def delete_posts():
     posts_id = request.form.get("post_id")
     if posts_id:
         posts = PostsModel.query.get(posts_id)
         if posts:
-            posts.is_delete = 0
+            posts.is_delete = 1
             db.session.commit()
             return restful.success()
         else:
@@ -203,35 +203,35 @@ def delete_essence_posts():
         return restful.params_errors(message='请输入帖子ID')
 
 
-# 评论管理
-@permission_required(CMSPersmission.COMMENTER)
-def cms_comments_view():
-    comment = CommentModel.query.filter(CommentModel.is_delete == 1).order_by(CommentModel.id).all()
-    return render_template('cms/cms_comment.html', comment=comment)
+# # 评论管理
+# @permission_required(CMSPersmission.COMMENTER)
+# def cms_comments_view():
+#     comment = CommentModel.query.filter(CommentModel.is_delete == 0).order_by(CommentModel.id).all()
+#     return render_template('cms/cms_comment.html', comment=comment)
 
 
-# 删除评论
-@cms_bp.route("/delete_comment/", methods=['POST'])
-def delete_comment():
-    comment_id = request.form.get('comment_id')
-
-    if not comment_id:
-        return restful.params_errors(message='评论ID不存在')
-
-    comment = CommentModel.query.get(comment_id)
-
-    if not comment:
-        return restful.params_errors(message='评论不存在')
-
-    comment.is_delete = 0
-    db.session.commit()
-    return restful.success()
+# # 删除评论
+# @cms_bp.route("/delete_comment/", methods=['POST'])
+# def delete_comment():
+#     comment_id = request.form.get('comment_id')
+#
+#     if not comment_id:
+#         return restful.params_errors(message='评论ID不存在')
+#
+#     comment = CommentModel.query.get(comment_id)
+#
+#     if not comment:
+#         return restful.params_errors(message='评论不存在')
+#
+#     comment.is_delete = 1
+#     db.session.commit()
+#     return restful.success()
 
 
 # 板块管理
 @permission_required(CMSPersmission.BOARDER)
 def cms_boards_view():
-    boards = BoardModel.query.filter(BoardModel.is_delete == 1).order_by(BoardModel.id).all()
+    boards = BoardModel.query.filter(BoardModel.is_delete == 0).order_by(BoardModel.id).all()
     return render_template('cms/cms_boards.html', boards=boards)
 
 
@@ -281,7 +281,7 @@ def delete_board():
     if not board:
         return restful.params_errors(message='板块名称不存在')
 
-    board.is_delete = 0
+    board.is_delete = 1
     db.session.commit()
     return restful.success()
 
@@ -289,7 +289,7 @@ def delete_board():
 # 后台用户管理
 @permission_required(CMSPersmission.CMSUSER)
 def cms_cmsuser_manage_view():
-    cms_users = CMSUser.query.filter_by(is_delete=1).all()
+    cms_users = CMSUser.query.filter_by(is_delete=0).all()
 
     return render_template('cms/cms_cmsuser_manage.html', cms_users=cms_users)
 
@@ -300,11 +300,17 @@ def add_cms_user():
     add_cmsuser_form = AddCmsUserForm(request.form)
     if add_cmsuser_form.validate():
         username = add_cmsuser_form.username.data
-        password = add_cmsuser_form.password.data
         email = add_cmsuser_form.email.data
+        password = add_cmsuser_form.password.data
         role = add_cmsuser_form.role.data
-        cms_role = db.session.query(CMSRole).get(role)
-        cms_user = CMSUser(username=username, password=password, email=email)
+        if role == '运营人员':
+            role_id = 5
+        elif role == '管理员':
+            role_id = 6
+        cms_role = db.session.query(CMSRole).get(role_id)
+        print('cms_role', cms_role)
+
+        cms_user = CMSUser(username=username, email=email, password=password)
         cms_role.users.append(cms_user)
         db.session.add(cms_user)
         db.session.commit()
@@ -313,28 +319,29 @@ def add_cms_user():
         return restful.params_errors(message=add_cmsuser_form.get_form_error_message())
 
 
-# 修改用户角色
-@cms_bp.route("/update_cms_user_role/", methods=['POST'])
-def update_cms_user_role():
-    update_cmsuer_role_form = UpdateCmsUserRole(request.form)
-    if update_cmsuer_role_form.validate():
-        # 'data_id'原因：看js，那边post请求携带的参数就是'data_id'
-        cms_user_id = request.form.get('cms_user_id')
-        role_id = request.form.get('role_id')
-        if not cms_user_id:
-            return restful.params_errors(message='管理员不存在')
-
-        cms_user = CMSUser.query.get(cms_user_id)
-
-        if not cms_user:
-            return restful.params_errors(message='管理员不存在')
-
-        cms_role = db.session.query(CMSRole).get(role_id)
-        cms_role.users.append(cms_user)
-        db.session.commit()
-        return restful.success()
-    else:
-        return restful.params_errors(message=update_cmsuer_role_form.get_form_error_message())
+# # 修改用户角色
+# @cms_bp.route("/update_cms_user_role/", methods=['POST'])
+# def update_cms_user_role():
+#     update_cmsuer_role_form = UpdateCmsUserRole(request.form)
+#     if update_cmsuer_role_form.validate():
+#         # 'data_id'原因：看js，那边post请求携带的参数就是'data_id'
+#         cms_user_id = request.form.get('cms_user_id')
+#         role_id = request.form.get('role_id')
+#         if not cms_user_id:
+#             return restful.params_errors(message='管理员不存在')
+#
+#         cms_user = CMSUser.query.get(cms_user_id)
+#
+#         if not cms_user:
+#             return restful.params_errors(message='管理员不存在')
+#
+#         cms_role = db.session.query(CMSRole).get(role_id)
+#         cms_role.users.append(cms_user)
+#         db.session.add(cms_role)
+#         db.session.commit()
+#         return restful.success()
+#     else:
+#         return restful.params_errors(message=update_cmsuer_role_form.get_form_error_message())
 
 
 # 删除后台用户。点击'删除'，会通过js的ajax的post请求就会访问这个/delete_cms_user/。
@@ -351,7 +358,7 @@ def delete_cms_user():
     if not cms_user:
         return restful.params_errors(message='管理员不存在')
 
-    cms_user.is_delete = 0
+    cms_user.is_delete = 1
     db.session.commit()
     return restful.success()
 
@@ -359,7 +366,8 @@ def delete_cms_user():
 # 轮播图管理
 def cms_banners_view():
     # 按把数据库轮播图表里面所有的数据给取出来，按优先级priority这个字段排序
-    banners = BannerModel.query.order_by(BannerModel.priority).all()
+    banners = BannerModel.query.order_by(BannerModel.id).all()
+    print(banners)
     return render_template('cms/cms_banners.html', banners=banners)
 
 
@@ -371,9 +379,9 @@ def add_banner():
         name = add_banner_form.name.data
         image_url = add_banner_form.image_url.data
         link_url = add_banner_form.link_url.data
-        priority = add_banner_form.priority.data
+        # priority = add_banner_form.priority.data
 
-        banner = BannerModel(name=name, image_url=image_url, link_url=link_url, priority=priority)
+        banner = BannerModel(name=name, image_url=image_url, link_url=link_url)
         db.session.add(banner)
         db.session.commit()
         return restful.success()
@@ -417,23 +425,18 @@ def delete_banner():
 
     banner = BannerModel.query.get(banner_id)
     if banner:
-        banner.is_delete = 0
+        db.session.delete(banner)
         db.session.commit()
         return restful.success()
     else:
         return restful.params_errors('轮播图不存在')
 
 
-@cms_bp.route('/text/')
-def Text():
-    return render_template('cms/上传图片到七牛云操作.html')
-
-
 cms_bp.add_url_rule('/home_page/', endpoint='home_page', view_func=cms_home_page)
 cms_bp.add_url_rule('/logout/', endpoint='logout', view_func=cms_logout_view)
 cms_bp.add_url_rule('/profile/', endpoint='profile', view_func=cms_profile_view)
 cms_bp.add_url_rule('/posts/', endpoint='posts', view_func=cms_posts_view)
-cms_bp.add_url_rule('/comments/', endpoint='comments', view_func=cms_comments_view)
+# cms_bp.add_url_rule('/comments/', endpoint='comments', view_func=cms_comments_view)
 cms_bp.add_url_rule('/boards/', endpoint='boards', view_func=cms_boards_view)
 cms_bp.add_url_rule('/cmsuser_manage/', endpoint='cmsuser_manage', view_func=cms_cmsuser_manage_view)
 cms_bp.add_url_rule('/banners/', endpoint='banners', view_func=cms_banners_view)
@@ -441,5 +444,5 @@ cms_bp.add_url_rule('/banners/', endpoint='banners', view_func=cms_banners_view)
 
 cms_bp.add_url_rule('/login/', view_func=CMSLoginView.as_view('login'))
 cms_bp.add_url_rule('/resetpwd/', view_func=ResetPwdView.as_view('resetpwd'))
-cms_bp.add_url_rule('/resetemail/', view_func=ResetMailView.as_view('resetemail'))
+# cms_bp.add_url_rule('/resetemail/', view_func=ResetMailView.as_view('resetemail'))
 cms_bp.add_url_rule('/email_captcha/', view_func=EmailCaptchaView.as_view('email_captcha'))

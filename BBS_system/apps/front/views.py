@@ -28,14 +28,14 @@ def before_request():
 # 主页
 def front_home_page():
     # 往前台显示存储在mysql数据库里面的轮播图
-    banners = BannerModel.query.filter(BannerModel.is_delete == 1).order_by(BannerModel.priority).all()
-    boards = BoardModel.query.filter(BoardModel.is_delete == 1).order_by(BoardModel.id).all()
+    banners = BannerModel.query.filter(BannerModel.is_delete == 0).order_by(BannerModel.create_time.desc()).all()
+    boards = BoardModel.query.filter(BoardModel.is_delete == 0).order_by(BoardModel.id).all()
     # 前端<a href=" class="list-group-item active">Python</a>。带有active，Python会变蓝色填充。
     # 当点击Python时，会触发/front_home_page/? board_id=board.id这个url即重新映射这个HTML，
     # 而使下面current_board_id却有了值board.id，回到HTML那边会进行判断，然后Python选择了带active属性的a标签。Python就被蓝色填充
     # 不点posts,自然就是默认default=None。
     current_board_id = request.args.get('board_id', type=int, default=None)
-    # 获取搜索框内容
+    # 获取搜索框内容。点击搜索是携带者搜索框的内容然后进行重新刷新
     search = request.args.get('search', type=str, default='')
     # 如果点击'最新','精华帖子'，都会重定向/front_home_page/?current_choose=数字,有了数字则可判断'最新','精华帖子'
     # 这些哪个需要深灰色填充。默认current_choose为1。所以进入主页，默认'最新'被深灰色填充
@@ -48,21 +48,21 @@ def front_home_page():
     end_page = start_page + config.PER_PAGE
     if current_choose == 1:
         # 最新。desc()从高到低排序。把所有is_delete=1的数据按create_time从高到低排序。
-        old_posts = PostsModel.query.filter_by(is_delete=1).order_by(PostsModel.create_time.desc()).filter(PostsModel.title.like('%'+search+'%'))
+        old_posts = PostsModel.query.filter_by(is_delete=0).order_by(PostsModel.create_time.desc()).filter(PostsModel.title.like('%'+search+'%'))
     elif current_choose == 2:
         # 精华帖子。内连接
-        old_posts = db.session.query(PostsModel).join(EssencePostsModel).order_by(EssencePostsModel.create_time.desc()).filter(PostsModel.is_delete==1, PostsModel.title.like('%'+search+'%'))
+        old_posts = db.session.query(PostsModel).join(EssencePostsModel).order_by(EssencePostsModel.create_time.desc()).filter(PostsModel.is_delete==0, PostsModel.title.like('%'+search+'%'))
     elif current_choose == 3:
         # 阅读量最多
-        old_posts = PostsModel.query.filter_by(is_delete=1).order_by(PostsModel.read_count.desc(),  PostsModel.create_time.desc()).filter(PostsModel.is_delete==1, PostsModel.title.like('%'+search+'%'))
+        old_posts = PostsModel.query.filter_by(is_delete=0).order_by(PostsModel.read_count.desc(),  PostsModel.create_time.desc()).filter(PostsModel.is_delete==0, PostsModel.title.like('%'+search+'%'))
     elif current_choose == 4:
         # 评论最多。把帖子和评论两张表共同的合并，然后根据帖子id进行分组，分成几份组后，又根据每组里面评论id总数进行由大到小排序
-        old_posts = db.session.query(PostsModel).join(CommentModel).group_by(PostsModel.id).order_by(func.count(CommentModel.id).desc()).filter(PostsModel.is_delete==1, PostsModel.title.like('%'+search+'%'))
+        old_posts = db.session.query(PostsModel).join(CommentModel).group_by(PostsModel.id).order_by(func.count(CommentModel.id).desc()).filter(PostsModel.is_delete==0, PostsModel.title.like('%'+search+'%'))
     else:
-        old_posts = PostsModel.query.filter_by(is_delete=1).filter(PostsModel.title.like('%'+search+'%'))
+        old_posts = PostsModel.query.filter_by(is_delete=0).filter(PostsModel.title.like('%'+search+'%'))
 
     if current_board_id:
-        # 有点击'具体某个board'就从第start_page+1条开始，显示这个所属这个board的end_page - start_page=config.PER_PAGE即10条帖子
+        # .slice(start_page, end_page)这个是为了分页内容显示的
         posts = old_posts.filter(PostsModel.board_id == current_board_id).slice(start_page, end_page)
         # total一共有多少条。如果不切片处理
         total = old_posts.filter(PostsModel.board_id == current_board_id).count()
@@ -71,7 +71,7 @@ def front_home_page():
         posts = old_posts.slice(start_page, end_page)
         total = old_posts.count()
     # bs_version=3指定bootstrap版本为3，原因：不指定分页导航框样式很丑。page=数字当前第几页；total=数字 总共多少条数据；
-    # per_page=数字，每页显示多少条；inner_window=数字n。当前分页导航框页左右显示n个。 outer_window=0分页导航框页最左右显示一个
+    # per_page=数字，每页显示多少条；inner_window=数字n，当前分页导航框页左右显示n个。 outer_window=0分页导航框页最左右显示一个
     pagination = Pagination(bs_version=3, page=page, total=total, per_page=config.PER_PAGE, inner_window=1, outer_window=0)
 
     context = {
@@ -88,7 +88,7 @@ def front_home_page():
 # 帖子详情页面
 def posts_detail(posts_id):
     posts = db.session.query(PostsModel).get(posts_id)
-    comments = db.session.query(CommentModel).filter_by(posts_id=posts_id, is_delete=1).order_by(CommentModel.id.desc()).all()
+    comments = db.session.query(CommentModel).filter_by(posts_id=posts_id, is_delete=0).order_by(CommentModel.id.desc()).all()
     context = {
         'posts': posts,
         'comments': comments,
@@ -128,8 +128,8 @@ def add_head_portrait():
     add_head_portrait_form = AddHeadPortraitForm(request.form)
     if add_head_portrait_form.validate():
         image_url = add_head_portrait_form.image_url.data
-        front_user_id = add_head_portrait_form.front_user_id.data
-        print("front_user_id", front_user_id)
+        # front_user_id = add_head_portrait_form.front_user_id.data
+        front_user_id = g.front_user.id
         Front_User = db.session.query(FrontUser).get(front_user_id)
         if Front_User:
             Front_User.head_portrait = image_url
@@ -152,15 +152,12 @@ def updata_front_username():
     if Front_User:
         if old_value == Front_User.username:
             Front_User.username = input_values
-            print("走的用户名", front_user_id, input_values)
         elif old_value == Front_User.signature:
             Front_User.signature = input_values
-            print("走的签名", front_user_id, input_values)
         db.session.commit()
         return restful.success()
     else:
         return restful.params_errors(message='用户不存在')
-
 
 
 # 把图形验证码映射到前端页面。
@@ -169,7 +166,7 @@ def graph_captcha():
     try:
         # text生成的验证码 。image就是图形验证码,是一张图片
         text, image = Captcha.gene_graph_captcha()
-        # BytesIO 字节流
+        # BytesIO 字节流。字节流是处理二进制数据按字节来处理的
         out = BytesIO()
         # 把图片保存在字节流中  并制定格式png
         image.save(out, 'png')
@@ -214,6 +211,7 @@ def add_comment():
 # 注册
 class SignupView(views.MethodView):
     def get(self):
+        # request.referrer：跳转到这个视图的上一个url。request.url当前视图url
         return_to = request.referrer
         # 访问当前注册页面如果是通过点击类似a标签这种URL页面跳转过来访问的，并且这种URL页面是在这个项目里面而不是通过反爬访问
         # 或自己的那个注册URL访问自己，则注册成功跳转回那个URL页面。如果不是就跳转到fron_home_page。
@@ -279,7 +277,7 @@ class PostsView(views.MethodView):
     decorators = [front_signin_required]
 
     def get(self):
-        boards = BoardModel.query.filter(BoardModel.is_delete == 1).order_by(BoardModel.id).all()
+        boards = BoardModel.query.filter(BoardModel.is_delete == 0).order_by(BoardModel.id).all()
         return render_template('front/front_posts.html', boards=boards)
 
     # 点击'发帖子'，就会通过触发js的ajax触发这个post请求。把发布的帖子内容保存到数据里面

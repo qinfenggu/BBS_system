@@ -27,7 +27,7 @@ DEBUG = True
 SECRET_KEY = 'abc565pks58'
 TEMPLATES_AUTO_RELOAD = True   # 这是让模板自动更新到最新语句
 
-# 用于前台首页分页用的
+# 用于前台首页分页用的。
 PER_PAGE = 1
 
 CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'

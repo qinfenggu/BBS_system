@@ -34,17 +34,17 @@ $(function () {
         var passwordInput = $("input[name='password']");
         var password2Input = $("input[name='password2']");
         var emailInput = $("input[name='email']");
-        var roleInput = $("input[name='role']");
+        var roleOption = $("option[name='role']");
 
 
         var username = usernameInput.val();
         var password = passwordInput.val();
         var password2 = password2Input.val();
         var email = emailInput.val();
-        var role = roleInput.val();
+        var role = roleOption.val();
         var cms_userId = self.attr("data-id");
 
-        if(!username || !password || !password2 || !email || !role){
+        if(!username || !password || !password2  || !email || !role){
             lgalert.alertInfoToast('请输入完整的用户信息！');
             return;
         }

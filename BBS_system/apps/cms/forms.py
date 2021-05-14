@@ -45,7 +45,7 @@ class AddBannerForm(BaseForm):
     name = StringField(validators=[InputRequired(message='请输入轮播图名称')])
     image_url = StringField(validators=[InputRequired(message='请输入图片链接'), URL(message='图片链接有误')])
     link_url = StringField(validators=[InputRequired(message='请输入跳转链接'), URL(message='图片链接有误')])
-    priority = IntegerField(validators=[InputRequired(message='请输入轮播图优先级')])
+    # priority = IntegerField(validators=[InputRequired(message='请输入轮播图优先级')])
 
 
 # 更新轮播图表单验证
@@ -70,10 +70,10 @@ class UpdateBoardForm(AddBoardForm):
 # 添加管理员表单验证
 class AddCmsUserForm(BaseForm):
     username = StringField(validators=[InputRequired(message='请输入用户名')])
+    email = StringField(validators=[Email(message='请输入正确格式的邮箱地址'), InputRequired(message='请输入邮箱地址')])
     password = StringField(validators=[Length(min=6, max=20, message='请输入6-20位的密码')])
     password2 = StringField(validators=[EqualTo('password', message='两次密码输入不一致')])
-    email = StringField(validators=[Email(message='请输入正确格式的邮箱地址'), InputRequired(message='请输入邮箱地址')])
-    role = StringField(validators=[InputRequired(message='请选择角色')])
+    role = StringField(validators=[InputRequired(message='请选择角色'), ])
 
 
 # 管理员添加角色表单验证

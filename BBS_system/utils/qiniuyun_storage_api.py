@@ -25,7 +25,4 @@ def connecting_qiniuyun_console():
     # ret, info = put_file(token, key, localfile)
     # print('ret', ret)
     # print('info', info)
-    #
-    # assert ret['key'] == key
-    # assert ret['hash'] == etag(localfile)
     return token

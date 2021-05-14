@@ -23,19 +23,20 @@ class FrontUser(db.Model):
     _password = db.Column(db.String(100), nullable=False)
     # head_portrait头像，signature个性签名
     head_portrait = db.Column(db.String(100))
-    signature = db.Column(db.String(100), default="此人很懒什么也没有留下.....")
+    # signature = db.Column(db.String(100), default="此人很懒什么也没有留下.....")
 
     create_time = db.Column(db.DateTime, default=datetime.now)
 
     def __init__(self, *args, **kwargs):
         if "password" in kwargs:
-            # 会调用@password.setter下方法，self.password原是个方法，后为属性，属性值self._password
+            # 会调用@password.setter下方法，self.password原是个方法，后为属性，属性值self._password。@password.setter
             self.password = kwargs.get('password')
             kwargs.pop('password')
 
+
         # super(FrontUser, self).__init__(*args, **kwargs) 这是python2写法。
-        # 在模型里面，可以把上面的类属性按这样子定义，类属性值都是Noen。而类名（类属性名=值），就是给它们赋值。
-        # 类名（类属性名=值）这种在Python语法里面是不成立的。但是这个用在模型里面成立
+        # 在模型里面，可以把上面的静态属性按这样子定义，静态属性值都是Noen。而类名（类属性名=值），就是给它们赋值。
+        # 类名（静态属性名=值）这种在Python语法里面是不成立的。但是这个用在模型里面成立
         super().__init__(*args, **kwargs)
 
     @property
@@ -73,20 +74,28 @@ class PostsModel(db.Model):
 
     board = db.relationship("BoardModel", backref="posts")
     author = db.relationship("FrontUser", backref="posts")
-    is_delete = db.Column(db.Integer, default=1)
+    is_delete = db.Column(db.Integer, default=0)
 
     # 因为前端那边保存上来的是一个TTXT文本，不是HTML格式。下面这个方法是对保存上来的文本进行HTML格式处理,保存成markdown格式
     @staticmethod
     def on_changed_content(target, value, oldvalue, initiator):
         allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
                         'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
-                        'h1', 'h2', 'h3', 'p', 'img', 'video', 'div', 'iframe', 'p', 'br', 'span', 'hr', 'src', 'class']
+                        'h1', 'h2', 'h3', 'p', 'img', 'video', 'div', 'iframe', 'p', 'br', 'span', 'hr', 'src', 'class'
+                        'span', 'pre']
         allowed_attrs = {'*': ['class'],
                          'a': ['href', 'rel'],
-                         'img': ['src', 'alt']}
+                         'img': ['src', 'alt'],
+                         'spna': ['class'],
+                         'ol': ['class'],
+                         'li': ['class'],
+                         'pre': ['class'],
+                         'div': ['class']
+                         }
         target.content_html = bleach.linkify(bleach.clean(
             markdown(value, output_format='html'),
             tags=allowed_tags, strip=True, attributes=allowed_attrs))
+        print('target.content_html:', target.content_html)
 
 
 # 这个其实算是调用上面的on_changed_content
@@ -103,7 +112,7 @@ class CommentModel(db.Model):
     author_id = db.Column(db.String(100), db.ForeignKey("front_user.id"))
     posts_id = db.Column(db.Integer, db.ForeignKey("front_posts.id"))
     create_time = db.Column(db.DateTime, default=datetime.now)
-    is_delete = db.Column(db.Integer, default=1)
+    is_delete = db.Column(db.Integer, default=0)
 
     author = db.relationship("FrontUser", backref="comment")
     posts = db.relationship("PostsModel", backref="comment")

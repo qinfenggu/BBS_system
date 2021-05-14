@@ -18,7 +18,7 @@ class Captcha(object):
     # 验证码字体大小
     fontsize = 25
     # 加入干扰线的条数
-    line_number = 2
+    line_number = 3
 
     # 构建一个验证码源文本
     SOURCE = list(string.ascii_letters)
@@ -55,7 +55,7 @@ class Captcha(object):
             'verdana.ttf'
         ]
         font = random.choice(fonts)
-        print(font)
+        # print(font)
         return 'utils/image_captcha/' + font
 
     # 用来随机生成一个字符串(包括英文和数字)
@@ -97,5 +97,5 @@ class Captcha(object):
 
 if __name__ == '__main__':
     c = Captcha()
-    # c.gene_graph_captcha()
+    c.gene_graph_captcha()
     print(c.gene_graph_captcha())

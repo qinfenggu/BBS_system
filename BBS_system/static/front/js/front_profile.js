@@ -28,9 +28,10 @@ $(function () {
     $("#save-banner-btn").click(function (event) {
         event.preventDefault();
         var self = $(this);
+        var tr = self.parent().parent();
         var dialog = $("#banner-dialog");
         var imageInput = $("input[name='image_url']");
-
+        var front_user_id = tr.attr("data-id");
         var image_url = imageInput.val();
 
 
@@ -136,7 +137,7 @@ $(function () {
 // 七牛云JS初始化
 $(function () {
     lgqiniu.setUp({
-        'domain': 'http://qnjby4bk8.hd-bkt.clouddn.com/',
+        'domain': 'http://qsvqge52u.hd-bkt.clouddn.com/',
         'browse_btn': 'upload-btn',
         'uptoken_url': '/c/updata_token/',
         'success': function (up,file,info) {

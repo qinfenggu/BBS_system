@@ -42,7 +42,7 @@ $(function () {
         var submitType = self.attr('data-type');
         var bannerId = self.attr("data-id");
 
-        if(!name || !image_url || !link_url || !priority){
+        if(!name || !image_url || !link_url){
             lgalert.alertInfoToast('请输入完整的轮播图数据！');
             return;
         }
@@ -60,7 +60,6 @@ $(function () {
                 'name':name,
                 'image_url': image_url,
                 'link_url': link_url,
-                'priority':priority,
                 'banner_id': bannerId
             },
             'success': function (data) {
@@ -136,7 +135,7 @@ $(function () {
 // 七牛云JS初始化
 $(function () {
     lgqiniu.setUp({
-        'domain': 'http://qnjby4bk8.hd-bkt.clouddn.com/',
+        'domain': 'http://qsvqge52u.hd-bkt.clouddn.com/',
         'browse_btn': 'upload-btn',
         'uptoken_url': '/c/updata_token/',
         'success': function (up,file,info) {

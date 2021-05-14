@@ -9,22 +9,16 @@ class CMSPersmission(object):
     ALL_PERMISSION  = 0b11111111
 
     # 访问权限
-    VISITOR         = 0b00000001
+    BANNER         = 0b00000001
 
     # 帖子管理权限
     POSTER          = 0b00000010
 
-    # 评论管理权限
-    COMMENTER       = 0b00000100
-
     # 板块管理权限
-    BOARDER         = 0b00001000
+    BOARDER         = 0b00000100
 
     # 后台用户管理权限
-    CMSUSER         = 0b000100000
-
-    # 管理管理员用户权限
-    ADMINER         = 0b01000000
+    CMSUSER         = 0b00001000
 
 
 cms_role_user = db.Table(
@@ -42,14 +36,14 @@ class CMSUser(db.Model):
     _password = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), nullable=False, unique=True)
     # 1表示为为删除，0表示已删除
-    is_delete = db.Column(db.Integer, default=1)
+    is_delete = db.Column(db.Integer, default=0)
     create_time = db.Column(db.DateTime, default=datetime.now())
 
-    def __init__(self, username, password, email):
+    def __init__(self, username, email, password):
         self.username = username
+        self.email =email
         # 会调用@password.setter下方法，self.password原是个方法，后为属性，属性值self._password
         self.password = password
-        self.email = email
 
     @property
     def password(self):
@@ -80,8 +74,9 @@ class CMSUser(db.Model):
 
     # 判断当前用户是否拥有need_if_permissions这个权限
     def has_permissions(self, need_if_permissions):
+        # 当前用户拥有的全部权限：has_all_permissions
         has_all_permissions = self.permissions
-        # 如果has_all_permissions 含 permissions。则has_all_permissions & permissions得到permissions。
+        # 0b00000011 & 0b01000011 ，是含用公共部分，则返回的是0b00000011 ，因为它最小嘛。0b01000011 == 0b01000010 Python语言，返回的是False
         result = has_all_permissions & need_if_permissions == need_if_permissions
         return result
 
@@ -98,7 +93,7 @@ class CMSRole(db.Model):
     name = db.Column(db.String(50), nullable=False)
     describe = db.Column(db.String(200), nullable=False)
     create_time = db.Column(db.DateTime, default=datetime.now)
-    permissions = db.Column(db.Integer, default=CMSPersmission.VISITOR)
+    permissions = db.Column(db.Integer, default=CMSPersmission.BANNER)
 
     users = db.relationship('CMSUser', secondary=cms_role_user, backref='roles')
 
@@ -113,10 +108,10 @@ class BannerModel(db.Model):
     # 跳转链接。就是点击这张图片会跳转到另一个URL
     link_url = db.Column(db.String(255), nullable=False)
     # 优先级字段。作用就是，前端每添加一条轮播图数据，我就依次增1，作用相当于id了，可以知道哪条先添加，它是第几次添加的
-    priority = db.Column(db.Integer, default=0)
+    # priority = db.Column(db.Integer, nullable=True)
     create_time = db.Column(db.DateTime, default=datetime.now())
     # 1表示为为删除，0表示已删除
-    is_delete = db.Column(db.Integer, default=1)
+    is_delete = db.Column(db.Integer, default=0)
 
     def __str__(self):
         return 'name:{}'.format(self.name)
@@ -129,7 +124,7 @@ class BoardModel(db.Model):
     name = db.Column(db.String(255), nullable=False)
     create_time = db.Column(db.DateTime, default=datetime.now())
     # 1表示为为删除，0表示已删除
-    is_delete = db.Column(db.Integer, default=1)
+    is_delete = db.Column(db.Integer, default=0)
 
 
 # 精华帖子。以帖子的id作为外键
