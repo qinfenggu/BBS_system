@@ -65,7 +65,7 @@
                                     </p>
                                 </div>
                                 {% set user = g.front_user %}
-                                {% if user.id == comment.author_id %}
+                                {% if g.front_user and user.id == comment.author_id %}
                                     <button class="btn btn-danger btn-xs">删除</button>
                                 {% endif %}
                             </li>

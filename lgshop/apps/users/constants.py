@@ -1,6 +1,0 @@
-
-# 邮箱过期时间.单位/秒
-VERIFY_EMAIL_TOKEN_EXPIRES = 600
-
-# 一个用户最多可创建的收货地址数
-USER_ADDRESS_COUNTS_LIMT = 20

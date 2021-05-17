@@ -5,8 +5,9 @@ from yunpian_python_sdk.ypclient import YunpianClient
 # 云片网发送短信api接口
 def send_mobile_note(mobile, code):
     # 连接云片网
-    clnt = YunpianClient('0963f9d693d4e0a797c04da3991da876')
-    param = {YC.MOBILE: mobile, YC.TEXT: '【论坛系统】您的验证码是{}'.format(code)}
+    # clnt = YunpianClient('0963f9d693d4e0a797c04da3991da876')
+    clnt = YunpianClient('e8abe129a4e9f9a7c8c9adc8ece9ebc9')
+    param = {YC.MOBILE: mobile, YC.TEXT: '【于成令】您的验证码是{}'.format(code)}
     # 发送短信验证码
     r = clnt.sms().single_send(param)
     return r.code()
